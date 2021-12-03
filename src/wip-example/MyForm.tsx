@@ -1,9 +1,6 @@
 import { uniqueId } from "lodash";
 import { useEffect, useRef } from "react";
-import { FormState } from "src/lib/types";
-import { FormMighty } from "../lib/FormMighty";
-import { FormSubscriber } from "../lib/FormSubscriber";
-import { useInitForm } from "../lib/useInitForm";
+import { FormState, FormMighty, FormSubscriber, useInitForm } from "../lib";
 
 const RenderChecker: React.FC<{ scope?: string }> = ({ scope, children }) => {
   const countRef = useRef(1);

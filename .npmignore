@@ -1,0 +1,6 @@
+/.github
+/.vscode
+/src
+/build
+/public
+yarn.lock
