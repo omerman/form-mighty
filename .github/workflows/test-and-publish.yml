@@ -1,0 +1,32 @@
+name: Test and publish
+
+on: [push]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install dependencies
+        run: yarn install
+      - name: Format
+        run: yarn format:check
+      - name: Lint
+        run: yarn lint:err
+      - name: Typecheck
+        run: yarn typecheck
+      - name: Test
+        run: yarn test:ci
+
+  publish:
+    needs: [test]
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install dependencies
+        run: yarn install
+      - name: Build
+        run: yarn build
+      - name: Publish
+        run: echo 1
