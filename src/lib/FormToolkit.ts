@@ -34,6 +34,7 @@ export class FormToolkit<V extends DefaultFormValues> {
       initialValues: options.initialValues ?? {},
       isValid: options.isInitialValid ?? true,
       isValidating: options.isInitialRequiresValidation ?? true,
+      dirty: {},
     };
   }
 
