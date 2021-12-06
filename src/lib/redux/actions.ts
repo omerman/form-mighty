@@ -5,8 +5,7 @@ export const registerForm = <V extends DefaultFormValues>(
   initialState: FormState<V>
 ) => ({
   type: "@FORM_MIGHTY/RegisterForm" as const,
-  // @ts-ignore
-  payload: { uniqueKey, initialState: initialState as FormState<any> },
+  payload: { uniqueKey, initialState: initialState },
 });
 
 export const updateFormValues = <V extends DefaultFormValues>(

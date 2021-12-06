@@ -7,7 +7,7 @@ export interface FormState<V extends DefaultFormValues> {
   values: V;
   isValid: boolean;
   isValidating: boolean;
-  dirty: {
+  dirtyFields: {
     [Key in DottedPath<Object.Paths<V>>]?: string;
   }
 }
