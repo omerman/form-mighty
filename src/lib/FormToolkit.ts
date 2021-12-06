@@ -1,4 +1,4 @@
-import { Object } from "ts-toolbelt";
+import { Function } from "ts-toolbelt";
 import produce, { Draft } from "immer";
 import invariant from "invariant";
 import { uniqueId } from "lodash";
@@ -12,8 +12,8 @@ import { store } from "./redux/store";
 import {
   FormState,
   DefaultFormValues,
-  FieldPath,
   FormToolkitOptions,
+  FieldPath,
 } from "./types";
 
 export class FormToolkit<V extends DefaultFormValues> {
@@ -105,7 +105,7 @@ export class FormToolkit<V extends DefaultFormValues> {
     throw new Error("Not implemented");
   }
 
-  path<Path extends Object.Paths<V>>(path: Path): FieldPath.FieldPath<V, Path> {
-    return path as FieldPath.FieldPath<V, Path>;
+  path<P extends string>(path: Function.AutoPath<V, P>): FieldPath.FieldPath<V, P> {
+    return path as any as FieldPath.FieldPath<V, P>;
   }
 }

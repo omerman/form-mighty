@@ -7,7 +7,7 @@ it("Should render", () => {
   render(
     <FormProvider>
       <FormMighty initialValues={{}}>
-        <Field fieldPath={["a", "b"]}>{() => <code>Hi</code>}</Field>
+        <Field fieldPath="">{() => <code>Hi</code>}</Field>
       </FormMighty>
     </FormProvider>
   );
@@ -17,7 +17,7 @@ it("Should render children", async () => {
   const { container } = render(
     <FormProvider>
       <FormMighty initialValues={{}}>
-        <Field fieldPath={["a", "b"]}>{() => <code>Hi</code>}</Field>
+        <Field fieldPath="">{() => <code>Hi</code>}</Field>
       </FormMighty>
     </FormProvider>
   );
@@ -31,7 +31,7 @@ it("Should accept fieldPath", async () => {
   render(
     <FormProvider>
       <FormMighty initialValues={{}}>
-        <Field fieldPath={["a", "b"]}>{() => <code>Hi</code>}</Field>
+        <Field fieldPath={"a.b"}>{() => <code>Hi</code>}</Field>
       </FormMighty>
     </FormProvider>
   );
@@ -41,7 +41,7 @@ it("Should render field value matching the given path", async () => {
   const { container } = render(
     <FormProvider>
       <FormMighty initialValues={{ omer: 5 }}>
-        <Field fieldPath={["omer"]}>{(value) => <code>{value}</code>}</Field>
+        {(tk) => <Field fieldPath={tk.path("omer")}>{(value) => <code>{value}</code>}</Field>}
       </FormMighty>
     </FormProvider>
   );

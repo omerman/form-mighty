@@ -1,19 +1,11 @@
-import { Object } from "ts-toolbelt";
-import { DefaultFormValues } from "./DefaultFormValues";
+import { Object, String } from "ts-toolbelt";
+import { DefaultFormValues } from ".";
 
 export namespace FieldPath {
-  export type FieldPath<
-    V extends DefaultFormValues,
-    P extends Object.Paths<V>
-  > = P & {
-    // This field is for compilation only. it should not be accessed.
-    $$DefaultFormValues?: V;
-  };
+    export type FieldPath<V extends DefaultFormValues, Path extends string> = Path & {$$V: V};
 
-  export type FieldValue<FP extends FieldPath<any, any>> = FP extends FieldPath<
-    infer V,
-    infer P
-  >
-    ? Object.Path<V, P>
-    : never;
+    export type InferFieldValue<FP extends FieldPath<any, any>> = 
+        FP extends FieldPath<infer V, infer Path> 
+            ? Object.Path<V, String.Split<Path, '.'>> 
+            : never;
 }

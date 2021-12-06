@@ -1,6 +1,5 @@
-import { Object } from "ts-toolbelt";
 import { DefaultFormValues } from "./DefaultFormValues";
-import { DottedPaths } from "./DottedPaths";
+
 
 export interface FormState<V extends DefaultFormValues> {
   initialValues: Partial<V>;
@@ -8,6 +7,7 @@ export interface FormState<V extends DefaultFormValues> {
   isValid: boolean;
   isValidating: boolean;
   dirtyFields: {
-    [Key in DottedPaths<Object.Paths<V>>]?: string;
+    [key: string]: string;
   }
 }
+
