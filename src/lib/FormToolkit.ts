@@ -1,7 +1,7 @@
 import { Function } from "ts-toolbelt";
-import produce, { Draft } from "immer";
+import produce, { Draft, Patch } from "immer";
 import invariant from "invariant";
-import { uniqueId } from "lodash";
+import { uniqueId, get } from "lodash";
 import {
   completeValidation,
   registerForm,
@@ -60,20 +60,36 @@ export class FormToolkit<V extends DefaultFormValues> {
     }
   }
 
+  isFieldDirty<P extends string>(path: Function.AutoPath<V, P>): boolean {
+    return get(this.getState().dirtyFields, path) ?? false;
+  }
+
+  path<P extends string>(path: Function.AutoPath<V, P>): FieldPath.FieldPath<V, P> {
+    return path as any as FieldPath.FieldPath<V, P>;
+  }
+
   updateValues(
     arg: (valuesDraft: Draft<V>) => void | V,
     isStartValidation = true
   ) {
-    store.dispatch(
-      updateFormValues(
-        this.formKey,
-        produce(this.getState().values, arg),
-        isStartValidation
-      )
-    );
+    const patches: Patch[] = [];
+    const nextValues = produce(this.getState().values, arg as any, (appliedPatches) => {
+      patches.push(...appliedPatches);
+    });
 
-    if (isStartValidation) {
-      this.validate();
+    if (patches.length > 0) {
+      store.dispatch(
+        updateFormValues(
+          this.formKey,
+          nextValues,
+          patches,
+          isStartValidation,
+        )
+      );
+  
+      if (isStartValidation) {
+        this.validate();
+      }
     }
   }
 
@@ -103,9 +119,5 @@ export class FormToolkit<V extends DefaultFormValues> {
 
   subscribe() {
     throw new Error("Not implemented");
-  }
-
-  path<P extends string>(path: Function.AutoPath<V, P>): FieldPath.FieldPath<V, P> {
-    return path as any as FieldPath.FieldPath<V, P>;
   }
 }

@@ -7,7 +7,7 @@ export interface FormState<V extends DefaultFormValues> {
   isValid: boolean;
   isValidating: boolean;
   dirtyFields: {
-    [key: string]: string;
+    [key: string]: boolean;
   }
 }
 

@@ -4,13 +4,8 @@ import { useSelector } from "react-redux";
 import { FieldPath } from "./types/FieldPath";
 import { useForm } from "./useForm";
 
-export type FieldDescriptor<FP extends FieldPath.FieldPath<any, any> = string> = {
-  value: FieldPath.InferFieldValue<FP>;
-  onChange: (e?: FieldPath.InferFieldValue<FP> | React.ChangeEvent<HTMLInputElement>) => void;
-}
-
 export interface FieldProps<FP extends FieldPath.FieldPath<any, any> = string> {
-  fieldPath: FP extends string ? FP : never;
+  fieldPath: FP extends string ? FP : string;
   children: (descriptor: FieldDescriptor<FP>, dirty: boolean) => React.ReactNode;
 }
 
@@ -18,9 +13,10 @@ export const Field: <FP extends FieldPath.FieldPath<any, any> = string>(
   props: FieldProps<FP>
 ) => React.ReactElement<any, any> | null = ({ children, fieldPath }) => {
   const toolkit = useForm();
-  const value = useSelector(() => get(toolkit.getState().values, fieldPath as any));
+  const value = useSelector(() => get(toolkit.getState().values, fieldPath));
+  const dirty = useSelector(() => toolkit.isFieldDirty(fieldPath));
 
-  const fieldProps: FieldDescriptor<FieldPath.FieldPath<{}, string>> = {
+  const descriptor: FieldDescriptor<FieldPath.FieldPath<{}, string>> = {
     value,
     onChange: (e) => {
       toolkit.updateValues(draft => {
@@ -34,5 +30,10 @@ export const Field: <FP extends FieldPath.FieldPath<any, any> = string>(
     },
   };
 
-  return <>{children(fieldProps, true)}</>;
+  return <>{children(descriptor, dirty)}</>;
 };
+
+export type FieldDescriptor<FP extends FieldPath.FieldPath<any, any> = string> = {
+  value: FieldPath.InferFieldValue<FP>;
+  onChange: (e?: FieldPath.InferFieldValue<FP> | React.ChangeEvent<HTMLInputElement>) => void;
+}

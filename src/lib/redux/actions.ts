@@ -1,3 +1,4 @@
+import { Patch } from "immer";
 import { FormState, DefaultFormValues } from "../types";
 
 export const registerForm = <V extends DefaultFormValues>(
@@ -11,10 +12,11 @@ export const registerForm = <V extends DefaultFormValues>(
 export const updateFormValues = <V extends DefaultFormValues>(
   uniqueKey: string,
   nextValues: V,
+  appliedPatches: Patch[],
   isStartValidation = true
 ) => ({
   type: "@FORM_MIGHTY/UpdateFormValues" as const,
-  payload: { uniqueKey, nextValues, isStartValidation },
+  payload: { uniqueKey, nextValues, isStartValidation, appliedPatches },
 });
 
 export const startValidation = (uniqueKey: string) => ({

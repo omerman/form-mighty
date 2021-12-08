@@ -1,10 +1,10 @@
-import { render, waitFor, screen  } from "@testing-library/react";
+import { render, waitFor  } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Field } from "src/lib/Field";
 import { FormMighty } from "src/lib/FormMighty";
 import { FormProvider } from "src/lib/FormProvider";
 
-it("Should render", () => {
+it("should render", () => {
   render(
     <FormProvider>
       <FormMighty initialValues={{}}>
@@ -14,7 +14,7 @@ it("Should render", () => {
   );
 });
 
-it("Should render children", async () => {
+it("should render children", async () => {
   const { container } = render(
     <FormProvider>
       <FormMighty initialValues={{}}>
@@ -28,7 +28,7 @@ it("Should render children", async () => {
   expect(container.querySelector("code")).toHaveTextContent("Hi");
 });
 
-it("Should accept fieldPath", async () => {
+it("should accept fieldPath", async () => {
   render(
     <FormProvider>
       <FormMighty initialValues={{}}>
@@ -38,11 +38,11 @@ it("Should accept fieldPath", async () => {
   );
 });
 
-it("Should render field value matching the given path", async () => {
+it("should render field value matching the given path", async () => {
   const { container } = render(
     <FormProvider>
       <FormMighty initialValues={{ value: 5 }}>
-        {(tk) => <Field fieldPath={tk.path("value")}>{({value}) => <code>{value}</code>}</Field>}
+        {(tk) => <Field fieldPath={tk.path("value")}>{({ value }) => <code>{value}</code>}</Field>}
       </FormMighty>
     </FormProvider>
   );
@@ -52,63 +52,102 @@ it("Should render field value matching the given path", async () => {
   expect(container.querySelector("code")?.textContent).toBe("5");
 });
 
+describe("onChange", () => {
+  it("should be supplied while rendering children", async () => {
+    const { container } = render(
+      <FormProvider>
+        <FormMighty>
+          {(tk) => <Field fieldPath="">{({ onChange }) => <code>{String(onChange !== undefined)}</code>}</Field>}
+        </FormMighty>
+      </FormProvider>
+    );
+  
+    await waitFor(() => container.querySelector("code"));
+  
+    expect(container.querySelector("code")?.textContent).toBe("true");
+  });
 
-it("Should supply onChange callback", async () => {
-  const { container } = render(
-    <FormProvider>
-      <FormMighty>
-        {(tk) => <Field fieldPath="">{({ onChange}) => <code>{String(onChange !== undefined)}</code>}</Field>}
-      </FormMighty>
-    </FormProvider>
-  );
-
-  await waitFor(() => container.querySelector("code"));
-
-  expect(container.querySelector("code")?.textContent).toBe("true");
+  it("should support raw value as an argument", async () => {
+    const { container } = render(
+      <FormProvider>
+        <FormMighty initialValues={{value: 5}} >
+          {(tk) => <Field fieldPath={tk.path("value")}>{({ value, onChange}) => <code onClick={() => onChange(1000)} >{value}</code>}</Field>}
+        </FormMighty>
+      </FormProvider>
+    );
+  
+    await waitFor(() => container.querySelector("code"));
+  
+    userEvent.click(container.querySelector("code")!);
+  
+    expect(container.querySelector("code")?.textContent).toBe("1000");
+  });
+  
+  it("should support HTMLInput event as an argument", async () => {
+    const { container } = render(
+      <FormProvider>
+        <FormMighty initialValues={{value: ""}} >
+          {(tk) => <Field fieldPath={tk.path("value")}>{({ value, onChange}) => <input onChange={onChange} value={value} />}</Field>}
+        </FormMighty>
+      </FormProvider>
+    );
+  
+    await waitFor(() => container.querySelector("input"));
+  
+    userEvent.type(container.querySelector("input")!, "Hello World");
+  
+    expect(container.querySelector("input")?.value).toBe("Hello World");
+  });
 });
 
-it("Should supply onChange callback that works when passing a field value", async () => {
-  const { container } = render(
-    <FormProvider>
-      <FormMighty initialValues={{value: 5}} >
-        {(tk) => <Field fieldPath={tk.path("value")}>{({ value, onChange}) => <code onClick={() => onChange(1000)} >{value}</code>}</Field>}
-      </FormMighty>
-    </FormProvider>
-  );
+describe("dirty indicator", () => {
+  it("should be supplied (and false) when first rendering", async () => {
+    const { container } = render(
+      <FormProvider>
+        <FormMighty>
+          {(tk) => <Field fieldPath="">{(_, isDirty) => <code>{String(isDirty)}</code>}</Field>}
+        </FormMighty>
+      </FormProvider>
+    );
+  
+    await waitFor(() => container.querySelector("code"));
+  
+    expect(container.querySelector("code")?.textContent).toBe("false");
+  });
+  
+  it("should change after value changes", async () => {
+    const { container } = render(
+      <FormProvider>
+        <FormMighty initialValues={{value: 5}} >
+          {(tk) => <Field fieldPath={tk.path("value")}>{({onChange}, isDirty) => <code onClick={() => onChange(1000)} >{String(isDirty)}</code>}</Field>}
+        </FormMighty>
+      </FormProvider>
+    );
+  
+    await waitFor(() => container.querySelector("code"));
+  
+    userEvent.click(container.querySelector("code")!);
+  
+    expect(container.querySelector("code")?.textContent).toBe("true");
+  });
 
-  await waitFor(() => container.querySelector("code"));
-
-  userEvent.click(container.querySelector("code")!);
-
-  expect(container.querySelector("code")?.textContent).toBe("1000");
-});
-
-it("Should supply onChange callback that works with HTMLInput", async () => {
-  const { container } = render(
-    <FormProvider>
-      <FormMighty initialValues={{value: ""}} >
-        {(tk) => <Field fieldPath={tk.path("value")}>{({ value, onChange}) => <input onChange={onChange} value={value} />}</Field>}
-      </FormMighty>
-    </FormProvider>
-  );
-
-  await waitFor(() => container.querySelector("input"));
-
-  userEvent.type(container.querySelector("input")!, "Hello World");
-
-  expect(container.querySelector("input")?.value).toBe("Hello World");
-});
-
-it("Should include dirty indicator", async () => {
-  const { container } = render(
-    <FormProvider>
-      <FormMighty>
-        {(tk) => <Field fieldPath="">{( isDirty) => <code>{String(isDirty)}</code>}</Field>}
-      </FormMighty>
-    </FormProvider>
-  );
-
-  await waitFor(() => container.querySelector("code"));
-
-  expect(container.querySelector("code")?.textContent).toBeTruthy();
+  it("should change back after value becomes original", async () => {
+    const { container } = render(
+      <FormProvider>
+        <FormMighty initialValues={{value: ""}} >
+          {(tk) => <Field fieldPath={tk.path("value")}>{({ value, onChange}, isDirty) => <div>
+              <input onChange={onChange} value={value} />
+              <span>{String(isDirty)}</span>
+            </div>}</Field>}
+        </FormMighty>
+      </FormProvider>
+    );
+  
+    await waitFor(() => container.querySelector("input"));
+  
+    userEvent.type(container.querySelector("input")!, "Hello World");
+    userEvent.clear(container.querySelector("input")!);
+  
+    expect(container.querySelector("span")?.textContent).toBe("false");
+  });
 });

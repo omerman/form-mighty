@@ -1,3 +1,4 @@
+import { get } from "lodash";
 import produce from "immer";
 import { RootAction, RootState } from "./types";
 
@@ -12,9 +13,21 @@ export const reducer = (state = initialState, action: RootAction) => {
         break;
       }
       case "@FORM_MIGHTY/UpdateFormValues": {
-        const { uniqueKey, nextValues, isStartValidation } = action.payload;
+        const { uniqueKey, nextValues, isStartValidation, appliedPatches } = action.payload;
         draft[uniqueKey].values = nextValues;
         draft[uniqueKey].isValidating = isStartValidation;
+
+        appliedPatches.forEach(patch => {
+          patch.path.forEach((path, pathIndex) => {
+            const parentPath = patch.path.slice(0, pathIndex).join('.');
+            const prefix = parentPath === '' ? '' : `${parentPath}.`;
+            const fullPath = `${prefix}${path}`;
+
+            draft[uniqueKey].dirtyFields[fullPath] = patch.value !== get(state[uniqueKey].initialValues, fullPath);
+          });
+        });
+
+
         break;
       }
       case "@FORM_MIGHTY/StartValidation": {
