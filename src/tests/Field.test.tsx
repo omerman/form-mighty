@@ -53,7 +53,7 @@ it("should render field value matching the given path", async () => {
 
   await waitFor(() => container.querySelector("code"));
 
-  expect(container.querySelector("code")?.textContent).toBe("5");
+  expect(container.querySelector("code")!.textContent).toBe("5");
 });
 
 describe("onChange", () => {
@@ -72,7 +72,7 @@ describe("onChange", () => {
 
     await waitFor(() => container.querySelector("code"));
 
-    expect(container.querySelector("code")?.textContent).toBe("true");
+    expect(container.querySelector("code")!.textContent).toBe("true");
   });
 
   it("should support raw value as an argument", async () => {
@@ -94,7 +94,7 @@ describe("onChange", () => {
 
     userEvent.click(container.querySelector("code")!);
 
-    expect(container.querySelector("code")?.textContent).toBe("1000");
+    expect(container.querySelector("code")!.textContent).toBe("1000");
   });
 
   it("should support HTMLInput event as an argument", async () => {
@@ -116,7 +116,7 @@ describe("onChange", () => {
 
     userEvent.type(container.querySelector("input")!, "Hello World");
 
-    expect(container.querySelector("input")?.value).toBe("Hello World");
+    expect(container.querySelector("input")!.value).toBe("Hello World");
   });
 });
 
@@ -136,7 +136,7 @@ describe("dirty indicator", () => {
 
     await waitFor(() => container.querySelector("code"));
 
-    expect(container.querySelector("code")?.textContent).toBe("false");
+    expect(container.querySelector("code")!.textContent).toBe("false");
   });
 
   it("should change after value changes", async () => {
@@ -158,7 +158,7 @@ describe("dirty indicator", () => {
 
     userEvent.click(container.querySelector("code")!);
 
-    expect(container.querySelector("code")?.textContent).toBe("true");
+    expect(container.querySelector("code")!.textContent).toBe("true");
   });
 
   it("should change back after value becomes original", async () => {
