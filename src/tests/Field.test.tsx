@@ -1,4 +1,4 @@
-import { render, waitFor } from "@testing-library/react";
+import { render } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Field } from "src/lib/Field";
 import { FormMighty } from "src/lib/FormMighty";
@@ -49,7 +49,7 @@ it("should render field value matching the given path", async () => {
     </FormProvider>
   );
 
-  expect(container.querySelector("code")!.textContent).toBe("5");
+  expect(container.querySelector("code")).toHaveTextContent("5");
 });
 
 describe("onChange", () => {
@@ -66,7 +66,7 @@ describe("onChange", () => {
       </FormProvider>
     );
 
-    expect(container.querySelector("code")!.textContent).toBe("true");
+    expect(container.querySelector("code")).toHaveTextContent("true");
   });
 
   it("should support raw value as an argument", async () => {
@@ -86,7 +86,7 @@ describe("onChange", () => {
 
     userEvent.click(container.querySelector("code")!);
 
-    expect(container.querySelector("code")!.textContent).toBe("1000");
+    expect(container.querySelector("code")).toHaveTextContent("1000");
   });
 
   it("should support HTMLInput event as an argument", async () => {
@@ -106,7 +106,7 @@ describe("onChange", () => {
 
     userEvent.type(container.querySelector("input")!, "Hello World");
 
-    expect(container.querySelector("input")!.value).toBe("Hello World");
+    expect(container.querySelector("input")).toHaveValue("Hello World");
   });
 });
 
@@ -124,7 +124,7 @@ describe("dirty indicator", () => {
       </FormProvider>
     );
 
-    expect(container.querySelector("code")!.textContent).toBe("false");
+    expect(container.querySelector("code")).toHaveTextContent("false");
   });
 
   it("should change after value changes", async () => {
@@ -144,7 +144,7 @@ describe("dirty indicator", () => {
 
     userEvent.click(container.querySelector("code")!);
 
-    expect(container.querySelector("code")!.textContent).toBe("true");
+    expect(container.querySelector("code")).toHaveTextContent("true");
   });
 
   it("should change back after value becomes original", async () => {
@@ -168,6 +168,6 @@ describe("dirty indicator", () => {
     userEvent.type(container.querySelector("input")!, "Hello World");
     userEvent.clear(container.querySelector("input")!);
 
-    expect(container.querySelector("span")!.textContent).toBe("false");
+    expect(container.querySelector("span")).toHaveTextContent("false");
   });
 });
