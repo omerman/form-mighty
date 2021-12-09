@@ -1,4 +1,4 @@
-import { get } from "lodash";
+import { entries, get, some } from "lodash";
 import produce from "immer";
 import { RootAction, RootState } from "./types";
 
@@ -19,13 +19,30 @@ export const reducer = (state = initialState, action: RootAction) => {
         draft[uniqueKey].isValidating = isStartValidation;
 
         appliedPatches.forEach((patch) => {
-          patch.path.forEach((path, pathIndex) => {
-            const parentPath = patch.path.slice(0, pathIndex).join(".");
-            const prefix = parentPath === "" ? "" : `${parentPath}.`;
+          [...patch.path].reverse().forEach((path, pathIndex) => {
+            const parentPath = patch.path
+              .slice(0, patch.path.length - pathIndex - 1)
+              .join(".");
+
+            const hasParent = parentPath !== "";
+
+            const prefix = hasParent ? `${parentPath}.` : "";
             const fullPath = `${prefix}${path}`;
 
+            const childrenEntries = entries(
+              draft[uniqueKey].dirtyFields
+            ).filter(([key, value]) => {
+              return key !== fullPath && key.startsWith(fullPath);
+            });
+
+            const hasAnyChildren = childrenEntries.length > 0;
+
+            const hasDirtyChildren = childrenEntries.some(([, value]) => value);
+
             draft[uniqueKey].dirtyFields[fullPath] =
-              patch.value !== get(state[uniqueKey].initialValues, fullPath);
+              hasDirtyChildren ||
+              (!hasAnyChildren &&
+                patch.value !== get(draft[uniqueKey].initialValues, fullPath));
           });
         });
 

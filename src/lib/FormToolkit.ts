@@ -1,4 +1,4 @@
-import { Function } from "ts-toolbelt";
+import { Function, Object, String } from "ts-toolbelt";
 import produce, { Draft, Patch } from "immer";
 import invariant from "invariant";
 import { uniqueId, get } from "lodash";

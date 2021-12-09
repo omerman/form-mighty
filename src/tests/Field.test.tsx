@@ -170,4 +170,89 @@ describe("dirty indicator", () => {
 
     expect(container.querySelector("span")).toHaveTextContent("false");
   });
+
+  it("should also mark parent of nested path", () => {
+    const { container } = render(
+      <FormProvider>
+        <FormMighty initialValues={{ value: { nestedValue: 5 } }}>
+          {(tk) => (
+            <Field fieldPath={tk.path("value.nestedValue")}>
+              {({ onChange }, _) => (
+                <code onClick={() => onChange(1000)}>
+                  {String(tk.isFieldDirty("value"))}
+                </code>
+              )}
+            </Field>
+          )}
+        </FormMighty>
+      </FormProvider>
+    );
+
+    userEvent.click(container.querySelector("code")!);
+
+    expect(container.querySelector("code")).toHaveTextContent("true");
+  });
+
+  it("should change back parent of nested path after value becomes original", async () => {
+    const { container } = render(
+      <FormProvider>
+        <FormMighty initialValues={{ value: { nestedValue: "" } }}>
+          {(tk) => (
+            <Field fieldPath={tk.path("value.nestedValue")}>
+              {({ value, onChange }, _) => (
+                <div>
+                  <input onChange={onChange} value={value} />
+                  <span>{String(tk.isFieldDirty("value"))}</span>
+                </div>
+              )}
+            </Field>
+          )}
+        </FormMighty>
+      </FormProvider>
+    );
+
+    userEvent.type(container.querySelector("input")!, "H");
+    userEvent.clear(container.querySelector("input")!);
+
+    expect(container.querySelector("span")).toHaveTextContent("false");
+  });
+
+  // Just to be safe, validating that if one child becomes non dirty, everything still works.
+  it("should not change back parent of nested path after sibling value becomes original", async () => {
+    const { container } = render(
+      <FormProvider>
+        <FormMighty
+          initialValues={{ value: { nestedValue: "", nestedValue2: "" } }}
+        >
+          {(tk) => (
+            <>
+              <Field fieldPath={tk.path("value.nestedValue")}>
+                {({ value, onChange }, _) => (
+                  <div>
+                    <input id="input1" onChange={onChange} value={value} />
+                    <span>{String(tk.isFieldDirty("value"))}</span>
+                  </div>
+                )}
+              </Field>
+              <Field fieldPath={tk.path("value.nestedValue2")}>
+                {({ value, onChange }, _) => (
+                  <div>
+                    <input id="input2" onChange={onChange} value={value} />
+                    <span>{String(tk.isFieldDirty("value"))}</span>
+                  </div>
+                )}
+              </Field>
+            </>
+          )}
+        </FormMighty>
+      </FormProvider>
+    );
+
+    userEvent.type(container.querySelector("#input1")!, "H");
+    userEvent.type(container.querySelector("#input2")!, "H");
+
+    userEvent.clear(container.querySelector("#input1")!);
+
+    expect(container.querySelector("span")).toHaveTextContent("true");
+  });
 });
