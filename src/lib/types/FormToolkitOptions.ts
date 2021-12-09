@@ -5,6 +5,6 @@ export interface FormToolkitOptions<
 > {
   initialValues?: Partial<V>;
   validate?: (values: V) => boolean | Promise<boolean>;
-  isInitialValid?: boolean;
-  isInitialRequiresValidation?: boolean;
+  initialIsValid?: boolean;
+  initialIsValidating?: boolean;
 }

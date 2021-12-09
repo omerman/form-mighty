@@ -32,8 +32,8 @@ export class FormToolkit<V extends DefaultFormValues> {
     this.initialState = {
       values: options.initialValues as V,
       initialValues: options.initialValues ?? {},
-      isValid: options.isInitialValid ?? true,
-      isValidating: options.isInitialRequiresValidation ?? true,
+      isValid: options.initialIsValid ?? true,
+      isValidating: options.initialIsValidating ?? true,
       dirtyFields: {},
     };
   }

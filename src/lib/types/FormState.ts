@@ -1,6 +1,6 @@
 import { DefaultFormValues } from "./DefaultFormValues";
 
-export interface FormState<V extends DefaultFormValues> {
+export interface FormState<V extends DefaultFormValues = DefaultFormValues> {
   initialValues: Partial<V>;
   values: V;
   isValid: boolean;
