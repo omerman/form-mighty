@@ -1,4 +1,4 @@
-import { render, act, RenderResult, waitFor } from "@testing-library/react";
+import { render, RenderResult, waitFor, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Field } from "src/lib/Field";
 import { FormMighty } from "src/lib/FormMighty";
