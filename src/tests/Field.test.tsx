@@ -1,4 +1,4 @@
-import { render } from "@testing-library/react";
+import { render, act, RenderResult, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Field } from "src/lib/Field";
 import { FormMighty } from "src/lib/FormMighty";
@@ -70,7 +70,7 @@ describe("onChange", () => {
     expect(container.querySelector("code")).toHaveTextContent(/^true$/);
   });
 
-  it("should support raw value as an argument", async () => {
+  it("should support a plain(non Event) value as an argument", async () => {
     const { container } = render(
       <FormProvider>
         <FormMighty initialValues={{ value: 5 }}>
@@ -627,6 +627,226 @@ describe("dirty indicator", () => {
       });
 
       expect(container.querySelector("span")).toHaveTextContent(/^true$/);
+    });
+  });
+});
+
+describe("validation aspect", () => {
+  describe("validate prop", () => {
+    it("should be called uppon render with value as first arg", async () => {
+      const validate = jest.fn(() => false);
+
+      render(
+        <FormProvider>
+          <FormMighty initialValues={{ field1: 5 }}>
+            {(tk) => (
+              <Field fieldPath={tk.path("field1")} validate={validate}>
+                {() => null}
+              </Field>
+            )}
+          </FormMighty>
+        </FormProvider>
+      );
+
+      expect(validate).toHaveBeenCalledWith(5);
+    });
+
+    it("should be called after changing the field value", async () => {
+      const validate = jest.fn(() => false);
+
+      const { container } = render(
+        <FormProvider>
+          <FormMighty initialValues={{ field1: 5 }}>
+            {(tk) => (
+              <Field fieldPath={tk.path("field1")} validate={validate}>
+                {({ onChange }) => (
+                  <code onClick={() => onChange(1000)}>{null}</code>
+                )}
+              </Field>
+            )}
+          </FormMighty>
+        </FormProvider>
+      );
+
+      userEvent.click(container.querySelector("code")!);
+
+      expect(validate).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe("valid indicator", () => {
+    it("should be supplied while rendering children", async () => {
+      const { container } = render(
+        <FormProvider>
+          <FormMighty>
+            {(tk) => (
+              <Field fieldPath="">
+                {(_, { isValid }) => (
+                  <code>{String(isValid !== undefined)}</code>
+                )}
+              </Field>
+            )}
+          </FormMighty>
+        </FormProvider>
+      );
+
+      expect(container.querySelector("code")?.textContent).toBe("true");
+    });
+
+    it("should be true when validate prop is missing", async () => {
+      const { container } = render(
+        <FormProvider>
+          <FormMighty>
+            {(tk) => (
+              <Field fieldPath="">
+                {(_, { isValid }) => <code>{String(isValid)}</code>}
+              </Field>
+            )}
+          </FormMighty>
+        </FormProvider>
+      );
+
+      expect(container.querySelector("code")?.textContent).toBe("true");
+    });
+
+    it("should be true at first render even if validate prop returns false", async () => {
+      const { container } = render(
+        <FormProvider>
+          <FormMighty>
+            {(tk) => (
+              <Field fieldPath="" validate={() => false}>
+                {(_, { isValid }) => <code>{String(isValid)}</code>}
+              </Field>
+            )}
+          </FormMighty>
+        </FormProvider>
+      );
+
+      expect(container.querySelector("code")?.textContent).toBe("true");
+    });
+
+    it("should be false after second render if validate prop returns false", async () => {
+      let renderResults: RenderResult;
+
+      act(() => {
+        renderResults = render(
+          <FormProvider>
+            <FormMighty>
+              {(tk) => (
+                <Field fieldPath="" validate={() => false}>
+                  {(_, { isValid }) => <code>{String(isValid)}</code>}
+                </Field>
+              )}
+            </FormMighty>
+          </FormProvider>
+        );
+      });
+
+      const { container } = renderResults!;
+
+      expect(container.querySelector("code")?.textContent).toBe("false");
+    });
+
+    it("should be true after second render if validate returns true", async () => {
+      let renderResults: RenderResult;
+
+      act(() => {
+        renderResults = render(
+          <FormProvider>
+            <FormMighty>
+              {(tk) => (
+                <Field fieldPath="" validate={() => true}>
+                  {(_, { isValid }) => <code>{String(isValid)}</code>}
+                </Field>
+              )}
+            </FormMighty>
+          </FormProvider>
+        );
+      });
+
+      const { container } = renderResults!;
+
+      await waitFor(() =>
+        expect(container.querySelector("code")?.textContent).toBe("false")
+      );
+    });
+
+    it("should reflect validate method result changes", async () => {
+      const validateFn = jest
+        .fn()
+        .mockReturnValueOnce(false)
+        .mockReturnValueOnce(true);
+      let renderResults: RenderResult;
+
+      act(() => {
+        renderResults = render(
+          <FormProvider>
+            <FormMighty>
+              {(tk) => (
+                <Field fieldPath="" validate={validateFn}>
+                  {({ onChange }, { isValid }) => (
+                    <code onClick={() => onChange(1000)}>
+                      {String(isValid)}
+                    </code>
+                  )}
+                </Field>
+              )}
+            </FormMighty>
+          </FormProvider>
+        );
+      });
+
+      const { container } = renderResults!;
+
+      act(() => {
+        userEvent.click(container.querySelector("code")!);
+
+        // The validity change should take affect later.
+        expect(container.querySelector("code")?.textContent).toBe("false");
+      });
+
+      await waitFor(() =>
+        expect(container.querySelector("code")?.textContent).toBe("true")
+      );
+    });
+
+    it("should reflect validate method result changes if validate is async", async () => {
+      const validateFn = jest
+        .fn()
+        .mockReturnValueOnce(false)
+        .mockReturnValueOnce(async () => true);
+      let renderResults: RenderResult;
+
+      act(() => {
+        renderResults = render(
+          <FormProvider>
+            <FormMighty>
+              {(tk) => (
+                <Field fieldPath="" validate={validateFn}>
+                  {({ onChange }, { isValid }) => (
+                    <code onClick={() => onChange(1000)}>
+                      {String(isValid)}
+                    </code>
+                  )}
+                </Field>
+              )}
+            </FormMighty>
+          </FormProvider>
+        );
+      });
+
+      const { container } = renderResults!;
+
+      act(() => {
+        userEvent.click(container.querySelector("code")!);
+
+        // The validity change should take affect later.
+        expect(container.querySelector("code")?.textContent).toBe("false");
+      });
+
+      await waitFor(() =>
+        expect(container.querySelector("code")?.textContent).toBe("true")
+      );
     });
   });
 });
