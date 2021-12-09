@@ -26,7 +26,7 @@ export class FormToolkit<V extends DefaultFormValues> {
     isValid: true,
   });
 
-  constructor(private readonly options: FormToolkitOptions<V>) {
+  constructor(private readonly options: FormToolkitOptions<V> = {}) {
     this.formKey = uniqueId("form-");
 
     this.initialState = {
@@ -52,7 +52,7 @@ export class FormToolkit<V extends DefaultFormValues> {
     }
   }
 
-  getState() {
+  getState(): FormState<V> {
     if (this.isRegistered()) {
       return store.getState()[this.formKey];
     } else {

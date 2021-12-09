@@ -1,13 +1,26 @@
 import { render, waitFor } from "@testing-library/react";
 import { FormProvider, FormState, FormSubscriber } from "src/lib";
 import { FormMighty } from "src/lib/FormMighty";
+import { FormToolkit } from "src/lib/FormToolkit";
 
-it("should render", () => {
+it("should render children", () => {
   render(
     <FormProvider>
       <FormMighty>{() => null}</FormMighty>
     </FormProvider>
   );
+});
+
+it("should render component", () => {
+  const MySweetComponent = () => <code>Yey</code>;
+
+  const { container } = render(
+    <FormProvider>
+      <FormMighty component={MySweetComponent} />
+    </FormProvider>
+  );
+
+  expect(container.querySelector("code")).toHaveTextContent("Yey");
 });
 
 it("should throw if no children & no component prop supplied", () => {
@@ -89,6 +102,26 @@ describe("formToolkit", () => {
 
     await waitFor(() =>
       expect(container.querySelector("code")).toHaveTextContent("false")
+    );
+  });
+
+  it("may be overriden with custom toolkit", async () => {
+    const toolkit = new FormToolkit({
+      initialValues: { specialInitialValue: 5 },
+    });
+
+    const { container } = render(
+      <FormProvider>
+        <FormMighty toolkit={toolkit}>
+          {(tk) => <code>{JSON.stringify(tk.getState().initialValues)}</code>}
+        </FormMighty>
+      </FormProvider>
+    );
+
+    await waitFor(() =>
+      expect(container.querySelector("code")).toHaveTextContent(
+        JSON.stringify(toolkit.getState().initialValues)
+      )
     );
   });
 });

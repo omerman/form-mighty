@@ -17,12 +17,12 @@ export const FormMighty: <V>(
   props: FormMightyProps<V>
 ) => React.ReactElement<any, any> | null = ({
   toolkit: givenToolkit,
-  component,
+  component: Component,
   children,
   ...toolkitOptions
 }) => {
   invariant(
-    component ?? children,
+    Component ?? children,
     "FormMighty - Must include one of [component, children] props"
   );
 
@@ -35,10 +35,13 @@ export const FormMighty: <V>(
 
   return (
     <FormContextProvider value={toolkitRef.current}>
-      {component ??
-        (typeof children === "function"
-          ? children!(toolkitRef.current)
-          : children)}
+      {Component ? (
+        <Component />
+      ) : typeof children === "function" ? (
+        children!(toolkitRef.current)
+      ) : (
+        children
+      )}
     </FormContextProvider>
   );
 };
