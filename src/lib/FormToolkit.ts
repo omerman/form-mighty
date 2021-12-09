@@ -64,7 +64,9 @@ export class FormToolkit<V extends DefaultFormValues> {
     return get(this.getState().dirtyFields, path) ?? false;
   }
 
-  path<P extends string>(path: Function.AutoPath<V, P>): FieldPath.FieldPath<V, P> {
+  path<P extends string>(
+    path: Function.AutoPath<V, P>
+  ): FieldPath.FieldPath<V, P> {
     return path as any as FieldPath.FieldPath<V, P>;
   }
 
@@ -73,20 +75,19 @@ export class FormToolkit<V extends DefaultFormValues> {
     isStartValidation = true
   ) {
     const patches: Patch[] = [];
-    const nextValues = produce(this.getState().values, arg as any, (appliedPatches) => {
-      patches.push(...appliedPatches);
-    });
+    const nextValues = produce(
+      this.getState().values,
+      arg as any,
+      (appliedPatches) => {
+        patches.push(...appliedPatches);
+      }
+    );
 
     if (patches.length > 0) {
       store.dispatch(
-        updateFormValues(
-          this.formKey,
-          nextValues,
-          patches,
-          isStartValidation,
-        )
+        updateFormValues(this.formKey, nextValues, patches, isStartValidation)
       );
-  
+
       if (isStartValidation) {
         this.validate();
       }

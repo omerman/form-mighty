@@ -13,20 +13,21 @@ export const reducer = (state = initialState, action: RootAction) => {
         break;
       }
       case "@FORM_MIGHTY/UpdateFormValues": {
-        const { uniqueKey, nextValues, isStartValidation, appliedPatches } = action.payload;
+        const { uniqueKey, nextValues, isStartValidation, appliedPatches } =
+          action.payload;
         draft[uniqueKey].values = nextValues;
         draft[uniqueKey].isValidating = isStartValidation;
 
-        appliedPatches.forEach(patch => {
+        appliedPatches.forEach((patch) => {
           patch.path.forEach((path, pathIndex) => {
-            const parentPath = patch.path.slice(0, pathIndex).join('.');
-            const prefix = parentPath === '' ? '' : `${parentPath}.`;
+            const parentPath = patch.path.slice(0, pathIndex).join(".");
+            const prefix = parentPath === "" ? "" : `${parentPath}.`;
             const fullPath = `${prefix}${path}`;
 
-            draft[uniqueKey].dirtyFields[fullPath] = patch.value !== get(state[uniqueKey].initialValues, fullPath);
+            draft[uniqueKey].dirtyFields[fullPath] =
+              patch.value !== get(state[uniqueKey].initialValues, fullPath);
           });
         });
-
 
         break;
       }
