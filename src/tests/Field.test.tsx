@@ -23,8 +23,6 @@ it("should render children", async () => {
     </FormProvider>
   );
 
-  await waitFor(() => container.querySelector("code"));
-
   expect(container.querySelector("code")).toHaveTextContent("Hi");
 });
 
@@ -51,8 +49,6 @@ it("should render field value matching the given path", async () => {
     </FormProvider>
   );
 
-  await waitFor(() => container.querySelector("code"));
-
   expect(container.querySelector("code")!.textContent).toBe("5");
 });
 
@@ -69,8 +65,6 @@ describe("onChange", () => {
         </FormMighty>
       </FormProvider>
     );
-
-    await waitFor(() => container.querySelector("code"));
 
     expect(container.querySelector("code")!.textContent).toBe("true");
   });
@@ -89,8 +83,6 @@ describe("onChange", () => {
         </FormMighty>
       </FormProvider>
     );
-
-    await waitFor(() => container.querySelector("code"));
 
     userEvent.click(container.querySelector("code")!);
 
@@ -112,8 +104,6 @@ describe("onChange", () => {
       </FormProvider>
     );
 
-    await waitFor(() => container.querySelector("input"));
-
     userEvent.type(container.querySelector("input")!, "Hello World");
 
     expect(container.querySelector("input")!.value).toBe("Hello World");
@@ -134,8 +124,6 @@ describe("dirty indicator", () => {
       </FormProvider>
     );
 
-    await waitFor(() => container.querySelector("code"));
-
     expect(container.querySelector("code")!.textContent).toBe("false");
   });
 
@@ -153,8 +141,6 @@ describe("dirty indicator", () => {
         </FormMighty>
       </FormProvider>
     );
-
-    await waitFor(() => container.querySelector("code"));
 
     userEvent.click(container.querySelector("code")!);
 
@@ -178,8 +164,6 @@ describe("dirty indicator", () => {
         </FormMighty>
       </FormProvider>
     );
-
-    await waitFor(() => container.querySelector("input"));
 
     userEvent.type(container.querySelector("input")!, "Hello World");
     userEvent.clear(container.querySelector("input")!);
