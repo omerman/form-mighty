@@ -165,7 +165,7 @@ describe("dirty indicator", () => {
       </FormProvider>
     );
 
-    userEvent.type(container.querySelector("input")!, "Hello World");
+    userEvent.type(container.querySelector("input")!, "H");
     userEvent.clear(container.querySelector("input")!);
 
     expect(container.querySelector("span")).toHaveTextContent("false");
@@ -217,7 +217,6 @@ describe("dirty indicator", () => {
     expect(container.querySelector("span")).toHaveTextContent("false");
   });
 
-  // Just to be safe, validating that if one child becomes non dirty, everything still works.
   it("should not change back parent of nested path after sibling value becomes original", async () => {
     const { container } = render(
       <FormProvider>
@@ -252,6 +251,83 @@ describe("dirty indicator", () => {
     userEvent.type(container.querySelector("#input2")!, "H");
 
     userEvent.clear(container.querySelector("#input1")!);
+
+    expect(container.querySelector("span")).toHaveTextContent("true");
+  });
+
+  it("should be true for added fields", async () => {
+    type MyForm = { a?: { b: number } };
+
+    const { container } = render(
+      <FormProvider>
+        <FormMighty<MyForm> initialValues={{}}>
+          {(tk) => (
+            <Field fieldPath={tk.path("a.b")}>
+              {({ value, onChange }, _) => (
+                <div>
+                  <code onClick={() => onChange(1000)} />
+                  <span>
+                    {String(tk.isFieldDirty("a.b"))} {value}
+                  </span>
+                </div>
+              )}
+            </Field>
+          )}
+        </FormMighty>
+      </FormProvider>
+    );
+
+    userEvent.click(container.querySelector("code")!);
+
+    expect(container.querySelector("span")).toHaveTextContent("true");
+  });
+
+  it("should be true for added fields parents as well", async () => {
+    type MyForm = { a?: { b: number } };
+
+    const { container } = render(
+      <FormProvider>
+        <FormMighty<MyForm> initialValues={{}}>
+          {(tk) => (
+            <Field fieldPath={tk.path("a.b")}>
+              {({ value, onChange }, _) => (
+                <div>
+                  <code onClick={() => onChange(1000)} />
+                  <span>{String(tk.isFieldDirty("a"))}</span>
+                </div>
+              )}
+            </Field>
+          )}
+        </FormMighty>
+      </FormProvider>
+    );
+
+    userEvent.click(container.querySelector("code")!);
+
+    expect(container.querySelector("span")).toHaveTextContent("true");
+  });
+
+  it("should be true for a child that it's parent value becomes undefined", async () => {
+    type MyForm = { a?: { b: number } };
+
+    const { container } = render(
+      <FormProvider>
+        <FormMighty<MyForm> initialValues={{ a: { b: 5 } }}>
+          {(tk) => (
+            <Field fieldPath={tk.path("a")}>
+              {({ value, onChange }, _) => (
+                <div>
+                  <code onClick={() => onChange(undefined)} />
+                  <span>{String(tk.isFieldDirty("a.b"))}</span>
+                </div>
+              )}
+            </Field>
+          )}
+        </FormMighty>
+      </FormProvider>
+    );
+
+    userEvent.click(container.querySelector("code")!);
 
     expect(container.querySelector("span")).toHaveTextContent("true");
   });

@@ -1,6 +1,7 @@
-import { entries, get, some } from "lodash";
-import produce from "immer";
+import { entries, get, isEmpty } from "lodash";
+import produce, { Patch } from "immer";
 import { RootAction, RootState } from "./types";
+import { PatchUtils } from "../utils/PatchUtils";
 
 const initialState: RootState = {};
 
@@ -18,7 +19,24 @@ export const reducer = (state = initialState, action: RootAction) => {
         draft[uniqueKey].values = nextValues;
         draft[uniqueKey].isValidating = isStartValidation;
 
-        appliedPatches.forEach((patch) => {
+        const resolvedPatches = appliedPatches.reduce<Patch[]>(
+          (result, patch) => {
+            if (patch.op === "add") {
+              return PatchUtils.toDeepAddedPatches(patch.value, patch.path);
+            } else if (patch.op === "replace" && isEmpty(patch.value)) {
+              return PatchUtils.toDeepRemovedPatches(
+                get(state[uniqueKey].values, patch.path),
+                patch.path,
+                patch.value
+              );
+            } else {
+              return [...result, patch];
+            }
+          },
+          []
+        );
+
+        resolvedPatches.forEach((patch) => {
           [...patch.path].reverse().forEach((path, pathIndex) => {
             const parentPath = patch.path
               .slice(0, patch.path.length - pathIndex - 1)
