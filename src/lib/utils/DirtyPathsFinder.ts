@@ -21,10 +21,6 @@ export class DirtyPathsFinder {
 
       const markAsDirty = (path: string) => {
         nextDirtyFields[path] = true;
-        const parents = path.split(".");
-        parents.forEach((_, i) => {
-          nextDirtyFields[parents.slice(0, i).join(".")] = true;
-        });
       };
 
       if (
