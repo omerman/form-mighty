@@ -47,11 +47,6 @@ export class DirtyPathsFinder {
       }
 
       if (size(initialValue) !== size(value)) {
-        const addedValues = differenceBy(
-          entries(value),
-          entries(initialValue),
-          (a) => a[0]
-        );
         const missingInitialValues = differenceBy(
           entries(initialValue),
           entries(value),
@@ -59,7 +54,7 @@ export class DirtyPathsFinder {
         );
 
         PatchUtils.buildVisitedPaths(
-          concat(addedValues, missingInitialValues).map(([key, value]) => ({
+          concat(missingInitialValues).map(([key, value]) => ({
             path: [...path.split("."), key],
             value,
           }))
