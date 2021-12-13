@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { Field } from "src/lib/Field";
 import { FormMighty } from "src/lib/FormMighty";
 import { FormProvider } from "src/lib/FormProvider";
+import { FormToolkit } from "src/lib/FormToolkit";
 
 it("should render", () => {
   render(
@@ -151,7 +152,7 @@ describe("dirty indicator", () => {
       expect(container.querySelector("span")).toHaveTextContent(/^true$/);
     });
 
-    it("should become undirty if field is restored to initial value", async () => {
+    it("should become clean if field is restored to initial value", async () => {
       const { container } = render(
         <FormProvider>
           <FormMighty initialValues={{ value: "" }}>
@@ -175,18 +176,18 @@ describe("dirty indicator", () => {
       expect(container.querySelector("span")).toHaveTextContent(/^false$/);
     });
 
-    it("should be dirty if field is new", () => {
-      type MyForm = { a?: { b: number } };
+    it("should start dirty if field path is new and triggers change", () => {
+      type MyForm = { a?: { b: { c: number } } };
 
       const { container } = render(
         <FormProvider>
           <FormMighty<MyForm> initialValues={{}}>
             {(tk) => (
-              <Field fieldPath={tk.path("a.b")}>
-                {({ onChange }) => (
+              <Field fieldPath={tk.path("a.b.c")}>
+                {({ onChange }, isDirty) => (
                   <>
                     <code onClick={() => onChange(1000)} />
-                    <span>{String(tk.isFieldDirty("a.b"))}</span>
+                    <span>{String(isDirty)}</span>
                   </>
                 )}
               </Field>
@@ -200,21 +201,23 @@ describe("dirty indicator", () => {
       expect(container.querySelector("span")).toHaveTextContent(/^true$/);
     });
 
-    it("should be dirty if parent object value becomes undefined", async () => {
+    it("should become dirty if parent object value becomes undefined", async () => {
       type MyForm = { a?: { b: number } };
 
       const { container } = render(
         <FormProvider>
           <FormMighty<MyForm> initialValues={{ a: { b: 5 } }}>
             {(tk) => (
-              <Field fieldPath={tk.path("a")}>
-                {({ onChange }) => (
-                  <>
+              <>
+                <Field fieldPath={tk.path("a")}>
+                  {({ onChange }) => (
                     <code onClick={() => onChange(undefined)} />
-                    <span>{String(tk.isFieldDirty("a.b"))}</span>
-                  </>
-                )}
-              </Field>
+                  )}
+                </Field>
+                <Field fieldPath={tk.path("a.b")}>
+                  {(_, isDirty) => <span>{String(isDirty)}</span>}
+                </Field>
+              </>
             )}
           </FormMighty>
         </FormProvider>
@@ -225,7 +228,7 @@ describe("dirty indicator", () => {
       expect(container.querySelector("span")).toHaveTextContent(/^true$/);
     });
 
-    it("should be dirty if parent array value becomes undefined", async () => {
+    it("should become dirty if parent array value becomes undefined", async () => {
       type MyForm = { a?: string[] };
 
       const { container } = render(
@@ -240,6 +243,31 @@ describe("dirty indicator", () => {
                   </>
                 )}
               </Field>
+            )}
+          </FormMighty>
+        </FormProvider>
+      );
+
+      userEvent.click(container.querySelector("code")!);
+
+      expect(container.querySelector("span")).toHaveTextContent(/^true$/);
+    });
+
+    it("should become dirty if array prev sibling is deleted", async () => {
+      type MyForm = { a?: string[] };
+
+      const { container } = render(
+        <FormProvider>
+          <FormMighty<MyForm> initialValues={{ a: ["1", "2"] }}>
+            {(tk) => (
+              <>
+                <Field fieldPath={tk.path("a")}>
+                  {({ onChange }) => <code onClick={() => onChange(["2"])} />}
+                </Field>
+                <Field fieldPath={tk.path("a.1")}>
+                  {(_, isDirty) => <span>{String(isDirty)}</span>}
+                </Field>
+              </>
             )}
           </FormMighty>
         </FormProvider>
@@ -275,7 +303,7 @@ describe("dirty indicator", () => {
       expect(container.querySelector("span")).toHaveTextContent(/^true$/);
     });
 
-    it("should become undirty if child's field is restored to initial value", () => {
+    it("should become clean if child's field is restored to initial value", () => {
       const { container } = render(
         <FormProvider>
           <FormMighty initialValues={{ value: { nestedValue: "" } }}>
@@ -297,6 +325,31 @@ describe("dirty indicator", () => {
       userEvent.clear(container.querySelector("input")!);
 
       expect(container.querySelector("span")).toHaveTextContent(/^false$/);
+    });
+
+    it("should start dirty if child's field path is new and triggers change", () => {
+      type MyForm = { a?: { b: { c: number } } };
+
+      const { container } = render(
+        <FormProvider>
+          <FormMighty<MyForm> initialValues={{}}>
+            {(tk) => (
+              <>
+                <Field fieldPath={tk.path("a.b.c")}>
+                  {({ onChange }) => <code onClick={() => onChange(1000)} />}
+                </Field>
+                <Field fieldPath={tk.path("a")}>
+                  {(_, isDirty) => <span>{String(isDirty)}</span>}
+                </Field>
+              </>
+            )}
+          </FormMighty>
+        </FormProvider>
+      );
+
+      userEvent.click(container.querySelector("code")!);
+
+      expect(container.querySelector("span")).toHaveTextContent(/^true$/);
     });
 
     it("should remain dirty if only one child's field is restored to initial value", () => {
@@ -354,6 +407,68 @@ describe("dirty indicator", () => {
 
       expect(container.querySelector("span")).toHaveTextContent(/^true$/);
     });
+
+    it("should become dirty if child is deleted - using delete", () => {
+      const tk = new FormToolkit({
+        initialValues: {
+          a: {
+            one: 1 as number | undefined,
+            two: 2 as number | undefined,
+          },
+        },
+      });
+
+      const { container } = render(
+        <FormProvider>
+          <FormMighty toolkit={tk}>
+            {(tk) => (
+              <>
+                <Field fieldPath={tk.path("a")}>
+                  {(_, isDirty) => <span>{String(isDirty)}</span>}
+                </Field>
+              </>
+            )}
+          </FormMighty>
+        </FormProvider>
+      );
+
+      tk.updateValues((arg) => {
+        delete arg.a["one"];
+      });
+
+      expect(container.querySelector("span")).toHaveTextContent(/^true$/);
+    });
+
+    it("should become dirty if child is deleted - using assignment", () => {
+      const tk = new FormToolkit({
+        initialValues: {
+          a: {
+            one: 1 as number | undefined,
+            two: 2 as number | undefined,
+          },
+        },
+      });
+
+      const { container } = render(
+        <FormProvider>
+          <FormMighty toolkit={tk}>
+            {(tk) => (
+              <>
+                <Field fieldPath={tk.path("a")}>
+                  {(_, isDirty) => <span>{String(isDirty)}</span>}
+                </Field>
+              </>
+            )}
+          </FormMighty>
+        </FormProvider>
+      );
+
+      tk.updateValues((arg) => {
+        arg.a.one = undefined;
+      });
+
+      expect(container.querySelector("span")).toHaveTextContent(/^true$/);
+    });
   });
 
   describe("parent array", () => {
@@ -380,7 +495,7 @@ describe("dirty indicator", () => {
       expect(container.querySelector("span")).toHaveTextContent(/^true$/);
     });
 
-    it("should become undirty if child's field is restored to initial value", () => {
+    it("should become clean if child's field is restored to initial value", () => {
       const { container } = render(
         <FormProvider>
           <FormMighty initialValues={{ value: [""] }}>
@@ -402,6 +517,31 @@ describe("dirty indicator", () => {
       userEvent.clear(container.querySelector("input")!);
 
       expect(container.querySelector("span")).toHaveTextContent(/^false$/);
+    });
+
+    it("should start dirty if child's field path is new and triggers change", () => {
+      type MyForm = { a?: Array<{ b: number }> };
+
+      const { container } = render(
+        <FormProvider>
+          <FormMighty<MyForm> initialValues={{}}>
+            {(tk) => (
+              <>
+                <Field fieldPath={tk.path("a.0.b")}>
+                  {({ onChange }) => <code onClick={() => onChange(1000)} />}
+                </Field>
+                <Field fieldPath={tk.path("a")}>
+                  {(_, isDirty) => <span>{String(isDirty)}</span>}
+                </Field>
+              </>
+            )}
+          </FormMighty>
+        </FormProvider>
+      );
+
+      userEvent.click(container.querySelector("code")!);
+
+      expect(container.querySelector("span")).toHaveTextContent(/^true$/);
     });
 
     it("should remain dirty if only one child's field is restored to initial value", () => {
@@ -429,6 +569,62 @@ describe("dirty indicator", () => {
       userEvent.type(container.querySelector("#input2")!, "H");
 
       userEvent.clear(container.querySelector("#input1")!);
+
+      expect(container.querySelector("span")).toHaveTextContent(/^true$/);
+    });
+
+    it("should become dirty if child is deleted - using splice", () => {
+      const tk = new FormToolkit({
+        initialValues: {
+          a: [{ b: 1 }, { b: 2 }],
+        },
+      });
+
+      const { container } = render(
+        <FormProvider>
+          <FormMighty toolkit={tk}>
+            {(tk) => (
+              <>
+                <Field fieldPath={tk.path("a")}>
+                  {(_, isDirty) => <span>{String(isDirty)}</span>}
+                </Field>
+              </>
+            )}
+          </FormMighty>
+        </FormProvider>
+      );
+
+      tk.updateValues((arg) => {
+        arg.a.splice(0, 1);
+      });
+
+      expect(container.querySelector("span")).toHaveTextContent(/^true$/);
+    });
+
+    it("should become dirty if child is deleted - using assignment", () => {
+      const tk = new FormToolkit({
+        initialValues: {
+          a: [{ b: 1 }, { b: 2 }],
+        },
+      });
+
+      const { container } = render(
+        <FormProvider>
+          <FormMighty toolkit={tk}>
+            {(tk) => (
+              <>
+                <Field fieldPath={tk.path("a")}>
+                  {(_, isDirty) => <span>{String(isDirty)}</span>}
+                </Field>
+              </>
+            )}
+          </FormMighty>
+        </FormProvider>
+      );
+
+      tk.updateValues((arg) => {
+        arg.a = arg.a.filter((_, i) => i !== 0);
+      });
 
       expect(container.querySelector("span")).toHaveTextContent(/^true$/);
     });

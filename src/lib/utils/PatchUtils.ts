@@ -1,50 +1,36 @@
 import { Patch } from "immer";
-import { entries } from "lodash";
+import { isEmpty } from "lodash";
 
 export class PatchUtils {
-  static toDeepAddedPatches(
-    anyValue: any,
-    basePath: (string | number)[]
-  ): Patch[] {
-    if (typeof anyValue !== "object") {
+  static buildVisitedPaths(list: Omit<Patch, "op">[]) {
+    return list.reduce<string[]>((result, patch) => {
       return [
-        {
-          op: "add",
-          path: basePath,
-          value: anyValue,
-        },
-      ];
-    }
-
-    return entries(anyValue).reduce<Patch[]>(
-      (result, [key, value]) => [
         ...result,
-        ...PatchUtils.toDeepAddedPatches(value, [...basePath, key]),
-      ],
-      []
-    );
+        ...patch.path.reduce<string[]>(
+          (res, path, index) => [
+            ...res,
+            index === 0
+              ? `${path}`
+              : `${patch.path.slice(0, index).join(".")}.${path}`,
+          ],
+          []
+        ),
+        ...(typeof patch.value === "object" && !isEmpty(patch.value)
+          ? PatchUtils.buildObjectPaths(patch.value, patch.path.join("."))
+          : []),
+      ];
+    }, []);
   }
-  static toDeepRemovedPatches(
-    anyValue: any,
-    basePath: (string | number)[],
-    resetValue?: any
-  ): Patch[] {
-    if (typeof anyValue !== "object") {
-      return [
-        {
-          op: "replace", // We currently dont have any remove usecases.
-          path: basePath,
-          value: resetValue,
-        },
-      ];
-    }
 
-    return entries(anyValue).reduce<Patch[]>(
-      (result, [key, value]) => [
+  private static buildObjectPaths(obj: any, prefix: string): string[] {
+    if (typeof obj !== "object") return [];
+
+    return Object.keys(obj).reduce<string[]>((result, key) => {
+      return [
         ...result,
-        ...PatchUtils.toDeepRemovedPatches(value, [...basePath, key]),
-      ],
-      []
-    );
+        `${prefix}.${key}`,
+        ...PatchUtils.buildObjectPaths(obj[key], `${prefix}.${key}`),
+      ];
+    }, []);
   }
 }
