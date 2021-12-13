@@ -67,7 +67,7 @@ export class DirtyPathsFinder {
       const subPathsEntries = entries({
         ...currentDirtyPaths,
         ...nextDirtyFields,
-      }).filter(([key, value]) => {
+      }).filter(([key]) => {
         return key !== path && key.startsWith(path);
       });
 
