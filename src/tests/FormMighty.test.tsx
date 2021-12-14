@@ -105,6 +105,28 @@ describe("formToolkit", () => {
     );
   });
 
+  it("should be instantiated with given onSubmit", async () => {
+    const onSubmit = jest.fn();
+    let tk: FormToolkit<any>;
+
+    render(
+      <FormProvider>
+        <FormMighty onSubmit={onSubmit}>
+          {(_tk) => {
+            tk = _tk;
+            return null;
+          }}
+        </FormMighty>
+      </FormProvider>
+    );
+
+    await waitFor(() => Boolean(tk));
+
+    tk!.submit();
+
+    expect(onSubmit).toHaveBeenCalled();
+  });
+
   it("may be overriden with custom toolkit", async () => {
     const toolkit = new FormToolkit({
       initialValues: { specialInitialValue: 5 },
