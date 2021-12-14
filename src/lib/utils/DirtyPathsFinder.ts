@@ -40,45 +40,42 @@ export class DirtyPathsFinder {
       } else if (typeof initialValue !== "object") {
         markAsDirty(path);
         return;
-      }
+      } else {
+        if (size(initialValue) !== size(value)) {
+          const cleanMissingInitialValues = differenceBy(
+            entries(initialValue),
+            entries(value),
+            (a) => a[0]
+          ).filter(([key]) => {
+            return !currentDirtyPaths[`${path}.${key}`];
+          });
 
-      if (size(initialValue) !== size(value)) {
-        const cleanMissingInitialValues = differenceBy(
-          entries(initialValue),
-          entries(value),
-          (a) => a[0]
-        ).filter(([key]) => {
-          return !currentDirtyPaths[`${path}.${key}`];
+          PatchUtils.buildVisitedPaths(
+            concat(cleanMissingInitialValues).map(([key, value]) => ({
+              path: [...path.split("."), key],
+              value,
+            }))
+          ).forEach((path) => {
+            markAsDirty(path);
+          });
+        }
+
+        // Minor optimization
+        if (nextDirtyFields[path]) {
+          return;
+        }
+
+        const subPathsEntries = entries({
+          ...currentDirtyPaths,
+          ...nextDirtyFields,
+        }).filter(([key]) => {
+          return key !== path && key.startsWith(path);
         });
 
-        PatchUtils.buildVisitedPaths(
-          concat(cleanMissingInitialValues).map(([key, value]) => ({
-            path: [...path.split("."), key],
-            value,
-          }))
-        ).forEach((path) => {
-          markAsDirty(path);
-        });
+        const hasDirtyChildren = subPathsEntries.some(([, value]) => value);
+
+        nextDirtyFields[path] = hasDirtyChildren;
       }
-
-      // Minor optimization
-      if (nextDirtyFields[path]) {
-        return;
-      }
-
-      const subPathsEntries = entries({
-        ...currentDirtyPaths,
-        ...nextDirtyFields,
-      }).filter(([key]) => {
-        return key !== path && key.startsWith(path);
-      });
-
-      const hasAnyChildren = subPathsEntries.length > 0;
-
-      const hasDirtyChildren = subPathsEntries.some(([, value]) => value);
-
-      nextDirtyFields[path] =
-        hasDirtyChildren || (!hasAnyChildren && value !== initialValue);
     });
 
     return nextDirtyFields;
