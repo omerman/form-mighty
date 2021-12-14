@@ -87,6 +87,10 @@ export class FormToolkit<V extends DefaultFormValues> {
     }
   }
 
+  submit() {
+    this.options.onSubmit?.(this.getState().values);
+  }
+
   async validate() {
     const { values } = this.getState();
 
