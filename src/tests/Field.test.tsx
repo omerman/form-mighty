@@ -118,7 +118,7 @@ describe("dirty indicator", () => {
         <FormMighty>
           {(tk) => (
             <Field fieldPath="">
-              {(_, isDirty) => <code>{String(isDirty)}</code>}
+              {(_, { isDirty }) => <code>{String(isDirty)}</code>}
             </Field>
           )}
         </FormMighty>
@@ -135,7 +135,7 @@ describe("dirty indicator", () => {
           <FormMighty initialValues={{ value: 5 }}>
             {(tk) => (
               <Field fieldPath={tk.path("value")}>
-                {({ onChange }, isDirty) => (
+                {({ onChange }, { isDirty }) => (
                   <>
                     <code onClick={() => onChange(1000)} />
                     <span>{String(isDirty)}</span>
@@ -158,7 +158,7 @@ describe("dirty indicator", () => {
           <FormMighty initialValues={{ value: "" }}>
             {(tk) => (
               <Field fieldPath={tk.path("value")}>
-                {({ value, onChange }, isDirty) => (
+                {({ value, onChange }, { isDirty }) => (
                   <>
                     <input onChange={onChange} value={value} />
                     <span>{String(isDirty)}</span>
@@ -184,7 +184,7 @@ describe("dirty indicator", () => {
           <FormMighty<MyForm> initialValues={{}}>
             {(tk) => (
               <Field fieldPath={tk.path("a.b.c")}>
-                {({ onChange }, isDirty) => (
+                {({ onChange }, { isDirty }) => (
                   <>
                     <code onClick={() => onChange(1000)} />
                     <span>{String(isDirty)}</span>
@@ -215,7 +215,7 @@ describe("dirty indicator", () => {
                   )}
                 </Field>
                 <Field fieldPath={tk.path("a.b")}>
-                  {(_, isDirty) => <span>{String(isDirty)}</span>}
+                  {(_, { isDirty }) => <span>{String(isDirty)}</span>}
                 </Field>
               </>
             )}
@@ -265,7 +265,7 @@ describe("dirty indicator", () => {
                   {({ onChange }) => <code onClick={() => onChange(["2"])} />}
                 </Field>
                 <Field fieldPath={tk.path("a.1")}>
-                  {(_, isDirty) => <span>{String(isDirty)}</span>}
+                  {(_, { isDirty }) => <span>{String(isDirty)}</span>}
                 </Field>
               </>
             )}
@@ -290,7 +290,7 @@ describe("dirty indicator", () => {
                   {({ onChange }) => <code onClick={() => onChange(1000)} />}
                 </Field>
                 <Field fieldPath={tk.path("value.nestedValue")}>
-                  {(_, isDirty) => <span>{String(isDirty)}</span>}
+                  {(_, { isDirty }) => <span>{String(isDirty)}</span>}
                 </Field>
               </>
             )}
@@ -313,7 +313,7 @@ describe("dirty indicator", () => {
                   {({ onChange }) => <input onChange={onChange} />}
                 </Field>
                 <Field fieldPath={tk.path("value")}>
-                  {(_, isDirty) => <span>{String(isDirty)}</span>}
+                  {(_, { isDirty }) => <span>{String(isDirty)}</span>}
                 </Field>
               </>
             )}
@@ -339,7 +339,7 @@ describe("dirty indicator", () => {
                   {({ onChange }) => <code onClick={() => onChange(1000)} />}
                 </Field>
                 <Field fieldPath={tk.path("a")}>
-                  {(_, isDirty) => <span>{String(isDirty)}</span>}
+                  {(_, { isDirty }) => <span>{String(isDirty)}</span>}
                 </Field>
               </>
             )}
@@ -367,7 +367,7 @@ describe("dirty indicator", () => {
                   {({ onChange }) => <input id="input2" onChange={onChange} />}
                 </Field>
                 <Field fieldPath={tk.path("value")}>
-                  {(_, isDirty) => <span>{String(isDirty)}</span>}
+                  {(_, { isDirty }) => <span>{String(isDirty)}</span>}
                 </Field>
               </>
             )}
@@ -395,7 +395,7 @@ describe("dirty indicator", () => {
                   {({ onChange }) => <code onClick={() => onChange(1000)} />}
                 </Field>
                 <Field fieldPath={tk.path("a")}>
-                  {(_, isDirty) => <span>{String(isDirty)}</span>}
+                  {(_, { isDirty }) => <span>{String(isDirty)}</span>}
                 </Field>
               </>
             )}
@@ -424,7 +424,7 @@ describe("dirty indicator", () => {
             {(tk) => (
               <>
                 <Field fieldPath={tk.path("a")}>
-                  {(_, isDirty) => <span>{String(isDirty)}</span>}
+                  {(_, { isDirty }) => <span>{String(isDirty)}</span>}
                 </Field>
               </>
             )}
@@ -455,7 +455,7 @@ describe("dirty indicator", () => {
             {(tk) => (
               <>
                 <Field fieldPath={tk.path("a")}>
-                  {(_, isDirty) => <span>{String(isDirty)}</span>}
+                  {(_, { isDirty }) => <span>{String(isDirty)}</span>}
                 </Field>
               </>
             )}
@@ -482,7 +482,7 @@ describe("dirty indicator", () => {
                   {({ onChange }) => <code onClick={() => onChange("1000")} />}
                 </Field>
                 <Field fieldPath={tk.path("value")}>
-                  {(_, isDirty) => <span>{String(isDirty)}</span>}
+                  {(_, { isDirty }) => <span>{String(isDirty)}</span>}
                 </Field>
               </>
             )}
@@ -505,7 +505,7 @@ describe("dirty indicator", () => {
                   {({ onChange }) => <input onChange={onChange} />}
                 </Field>
                 <Field fieldPath={tk.path("value")}>
-                  {(_, isDirty) => <span>{String(isDirty)}</span>}
+                  {(_, { isDirty }) => <span>{String(isDirty)}</span>}
                 </Field>
               </>
             )}
@@ -531,7 +531,7 @@ describe("dirty indicator", () => {
                   {({ onChange }) => <code onClick={() => onChange(1000)} />}
                 </Field>
                 <Field fieldPath={tk.path("a")}>
-                  {(_, isDirty) => <span>{String(isDirty)}</span>}
+                  {(_, { isDirty }) => <span>{String(isDirty)}</span>}
                 </Field>
               </>
             )}
@@ -557,7 +557,7 @@ describe("dirty indicator", () => {
                   {({ onChange }) => <input id="input2" onChange={onChange} />}
                 </Field>
                 <Field fieldPath={tk.path("value")}>
-                  {(_, isDirty) => <span>{String(isDirty)}</span>}
+                  {(_, { isDirty }) => <span>{String(isDirty)}</span>}
                 </Field>
               </>
             )}
@@ -586,7 +586,7 @@ describe("dirty indicator", () => {
             {(tk) => (
               <>
                 <Field fieldPath={tk.path("a")}>
-                  {(_, isDirty) => <span>{String(isDirty)}</span>}
+                  {(_, { isDirty }) => <span>{String(isDirty)}</span>}
                 </Field>
               </>
             )}
@@ -614,7 +614,7 @@ describe("dirty indicator", () => {
             {(tk) => (
               <>
                 <Field fieldPath={tk.path("a")}>
-                  {(_, isDirty) => <span>{String(isDirty)}</span>}
+                  {(_, { isDirty }) => <span>{String(isDirty)}</span>}
                 </Field>
               </>
             )}
@@ -649,6 +649,36 @@ describe("validation aspect", () => {
       );
 
       expect(validate).toHaveBeenCalledWith(5);
+    });
+
+    it("should not be called again if validate fn changes", async () => {
+      const validate = jest.fn(() => false);
+
+      const { rerender } = render(
+        <FormProvider>
+          <FormMighty initialValues={{ field1: 5 }}>
+            {(tk) => (
+              <Field fieldPath={tk.path("field1")} validate={validate}>
+                {() => null}
+              </Field>
+            )}
+          </FormMighty>
+        </FormProvider>
+      );
+
+      rerender(
+        <FormProvider>
+          <FormMighty initialValues={{ field1: 5 }}>
+            {(tk) => (
+              <Field fieldPath={tk.path("field1")} validate={() => validate()}>
+                {() => null}
+              </Field>
+            )}
+          </FormMighty>
+        </FormProvider>
+      );
+
+      expect(validate).toHaveBeenCalledTimes(1);
     });
 
     it("should be called after changing the field value", async () => {
@@ -690,7 +720,7 @@ describe("validation aspect", () => {
         </FormProvider>
       );
 
-      expect(container.querySelector("code")?.textContent).toBe("true");
+      expect(container.querySelector("code")).toHaveTextContent(/^true$/);
     });
 
     it("should be true when validate prop is missing", async () => {
@@ -706,30 +736,12 @@ describe("validation aspect", () => {
         </FormProvider>
       );
 
-      expect(container.querySelector("code")?.textContent).toBe("true");
+      expect(container.querySelector("code")).toHaveTextContent(/^true$/);
     });
 
     it("should be true at first render even if validate prop returns false", async () => {
-      const { container } = render(
-        <FormProvider>
-          <FormMighty>
-            {(tk) => (
-              <Field fieldPath="" validate={() => false}>
-                {(_, { isValid }) => <code>{String(isValid)}</code>}
-              </Field>
-            )}
-          </FormMighty>
-        </FormProvider>
-      );
-
-      expect(container.querySelector("code")?.textContent).toBe("true");
-    });
-
-    it("should be false after second render if validate prop returns false", async () => {
-      let renderResults: RenderResult;
-
       act(() => {
-        renderResults = render(
+        const { container } = render(
           <FormProvider>
             <FormMighty>
               {(tk) => (
@@ -740,35 +752,25 @@ describe("validation aspect", () => {
             </FormMighty>
           </FormProvider>
         );
+
+        expect(container.querySelector("code")).toHaveTextContent(/^true$/);
       });
-
-      const { container } = renderResults!;
-
-      expect(container.querySelector("code")?.textContent).toBe("false");
     });
 
-    it("should be true after second render if validate returns true", async () => {
-      let renderResults: RenderResult;
+    it("should be false after second render if validate prop returns false", async () => {
+      const { container } = render(
+        <FormProvider>
+          <FormMighty>
+            {(tk) => (
+              <Field fieldPath="" validate={() => false}>
+                {(_, { isValid }) => <code>{String(isValid)}</code>}
+              </Field>
+            )}
+          </FormMighty>
+        </FormProvider>
+      )!;
 
-      act(() => {
-        renderResults = render(
-          <FormProvider>
-            <FormMighty>
-              {(tk) => (
-                <Field fieldPath="" validate={() => true}>
-                  {(_, { isValid }) => <code>{String(isValid)}</code>}
-                </Field>
-              )}
-            </FormMighty>
-          </FormProvider>
-        );
-      });
-
-      const { container } = renderResults!;
-
-      await waitFor(() =>
-        expect(container.querySelector("code")?.textContent).toBe("false")
-      );
+      expect(container.querySelector("code")).toHaveTextContent(/^false$/);
     });
 
     it("should reflect validate method result changes", async () => {
@@ -776,38 +778,29 @@ describe("validation aspect", () => {
         .fn()
         .mockReturnValueOnce(false)
         .mockReturnValueOnce(true);
-      let renderResults: RenderResult;
 
-      act(() => {
-        renderResults = render(
-          <FormProvider>
-            <FormMighty>
-              {(tk) => (
-                <Field fieldPath="" validate={validateFn}>
-                  {({ onChange }, { isValid }) => (
-                    <code onClick={() => onChange(1000)}>
-                      {String(isValid)}
-                    </code>
-                  )}
-                </Field>
-              )}
-            </FormMighty>
-          </FormProvider>
-        );
-      });
-
-      const { container } = renderResults!;
+      const { container } = render(
+        <FormProvider>
+          <FormMighty initialValues={{ a: 5 }}>
+            {(tk) => (
+              <Field fieldPath={tk.path("a")} validate={validateFn}>
+                {({ onChange }, { isValid }) => (
+                  <code onClick={() => onChange(1000)}>{String(isValid)}</code>
+                )}
+              </Field>
+            )}
+          </FormMighty>
+        </FormProvider>
+      );
 
       act(() => {
         userEvent.click(container.querySelector("code")!);
 
         // The validity change should take affect later.
-        expect(container.querySelector("code")?.textContent).toBe("false");
+        expect(container.querySelector("code")).toHaveTextContent(/^false$/);
       });
 
-      await waitFor(() =>
-        expect(container.querySelector("code")?.textContent).toBe("true")
-      );
+      expect(container.querySelector("code")).toHaveTextContent(/^true$/);
     });
 
     it("should reflect validate method result changes if validate is async", async () => {
@@ -820,9 +813,9 @@ describe("validation aspect", () => {
       act(() => {
         renderResults = render(
           <FormProvider>
-            <FormMighty>
+            <FormMighty initialValues={{ a: 5 }}>
               {(tk) => (
-                <Field fieldPath="" validate={validateFn}>
+                <Field fieldPath={tk.path("a")} validate={validateFn}>
                   {({ onChange }, { isValid }) => (
                     <code onClick={() => onChange(1000)}>
                       {String(isValid)}
@@ -841,11 +834,11 @@ describe("validation aspect", () => {
         userEvent.click(container.querySelector("code")!);
 
         // The validity change should take affect later.
-        expect(container.querySelector("code")?.textContent).toBe("false");
+        expect(container.querySelector("code")).toHaveTextContent(/^false$/);
       });
 
       await waitFor(() =>
-        expect(container.querySelector("code")?.textContent).toBe("true")
+        expect(container.querySelector("code")).toHaveTextContent(/^true$/)
       );
     });
   });
