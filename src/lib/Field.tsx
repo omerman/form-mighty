@@ -1,5 +1,5 @@
 import { get, set } from "lodash";
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { All } from "./types";
 import { FieldPath } from "./types/FieldPath";
@@ -10,17 +10,27 @@ export interface FieldProps<FP extends FieldPath.FieldPath<any, any> = string> {
   fieldPath: FP extends string ? FP : string;
   children: (
     descriptor: FieldDescriptor<FP>,
-    dirty: boolean
+    fieldState: { isDirty: boolean; isValid: boolean }
   ) => React.ReactNode;
+  validate?: (value: FieldPath.InferFieldValue<FP>) => boolean;
 }
 
 export const Field = <FP extends FieldPath.FieldPath<any, any> = string>({
   children,
   fieldPath,
+  validate,
 }: FieldProps<FP>) => {
   const toolkit = useForm();
   const value = useSelector(() => get(toolkit.getState().values, fieldPath));
-  const dirty = useSelector(() => toolkit.isFieldDirty(fieldPath));
+  const isDirty = useSelector(() => toolkit.isFieldDirty(fieldPath));
+  const [isValid, setIsValid] = useState(true);
+
+  const refs = useRef({ validate });
+  Object.assign(refs.current, { validate });
+
+  useEffect(() => {
+    setIsValid(refs.current.validate?.(value) ?? true);
+  }, [value]);
 
   const descriptor: FieldDescriptor<FP> = {
     value,
@@ -35,7 +45,7 @@ export const Field = <FP extends FieldPath.FieldPath<any, any> = string>({
     },
   };
 
-  return <>{children(descriptor, dirty)}</>;
+  return <>{children(descriptor, { isDirty, isValid })}</>;
 };
 
 export type FieldDescriptor<FP extends FieldPath.FieldPath<any, any> | string> =
