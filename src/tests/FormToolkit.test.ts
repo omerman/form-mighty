@@ -73,8 +73,6 @@ describe("submit", () => {
 
     const tk = new FormToolkit(opts);
 
-    tk.register(); // TODO - remove this after decoupling store from FormToolkit
-
     tk.updateValues((values) => {
       values.ok = 1000;
     });
