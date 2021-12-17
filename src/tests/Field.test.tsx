@@ -704,7 +704,7 @@ describe("validation aspect", () => {
     });
   });
 
-  describe("valid indicator", () => {
+  fdescribe("valid indicator", () => {
     it("should be supplied while rendering children", async () => {
       const { container } = render(
         <FormProvider>
@@ -807,7 +807,13 @@ describe("validation aspect", () => {
       const validateFn = jest
         .fn()
         .mockReturnValueOnce(false)
-        .mockReturnValueOnce(async () => true);
+        .mockReturnValueOnce(
+          new Promise((resolve) => {
+            setTimeout(() => {
+              resolve(true);
+            }, 100);
+          })
+        );
       let renderResults: RenderResult;
 
       act(() => {
