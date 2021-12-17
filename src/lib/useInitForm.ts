@@ -1,4 +1,4 @@
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { FormToolkit } from "./FormToolkit";
 import { DefaultFormValues, FormToolkitOptions } from "./types";
 
@@ -12,6 +12,10 @@ export const useInitForm: UseInitForm = (options = {}) => {
   const optionsRef = useRef(options);
 
   const toolkit = useMemo(() => new FormToolkit(optionsRef.current), []);
+
+  useEffect(() => {
+    return () => toolkit.dispose();
+  }, [toolkit]);
 
   return toolkit;
 };

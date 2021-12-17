@@ -1,7 +1,7 @@
 import { Function } from "ts-toolbelt";
 import produce, { Draft, Patch } from "immer";
 import { uniqueId, get } from "lodash";
-import { updateFormState } from "./redux/actions";
+import { disposeForm, updateFormState } from "./redux/actions";
 import { store } from "./redux/store";
 import {
   FormState,
@@ -125,6 +125,10 @@ export class FormToolkit<V extends DefaultFormValues> {
 
     this.state = nextState;
     store.dispatch(updateFormState(this.formKey, this.state));
+  }
+
+  dispose() {
+    store.dispatch(disposeForm(this.formKey));
   }
 
   subscribe() {

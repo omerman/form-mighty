@@ -11,6 +11,11 @@ export const reducer = (state = initialState, action: RootAction) => {
         draft[uniqueKey] = formState;
         break;
       }
+      case "@FORM_MIGHTY/disposeForm": {
+        const { uniqueKey } = action.payload;
+        delete draft[uniqueKey];
+        break;
+      }
     }
   });
 };
