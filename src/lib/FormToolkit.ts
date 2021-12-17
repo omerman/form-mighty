@@ -34,8 +34,18 @@ export class FormToolkit<V extends DefaultFormValues> {
     });
 
     if (this.state.isValidating) {
-      this.validate();
+      const initialValidationPromise = this.validate();
+      this.validationPromise = new Promise(async (resolve) => {
+        const result = await initialValidationPromise;
+
+        resolve({
+          timestamp: Date.now(),
+          isValid: result,
+        });
+      });
     }
+
+    this.submit = this.submit.bind(this);
   }
 
   getState(): FormState<V> {
@@ -87,8 +97,12 @@ export class FormToolkit<V extends DefaultFormValues> {
     }
   }
 
-  submit() {
-    this.options.onSubmit?.(this.getState().values);
+  async submit() {
+    const { isValid } = await this.validationPromise;
+
+    if (isValid) {
+      this.options.onSubmit?.(this.getState().values);
+    }
   }
 
   async validate() {

@@ -120,10 +120,7 @@ describe("formToolkit", () => {
       </FormProvider>
     );
 
-    await waitFor(() => Boolean(tk));
-
-    tk!.submit();
-
+    await tk!.submit();
     expect(onSubmit).toHaveBeenCalled();
   });
 
