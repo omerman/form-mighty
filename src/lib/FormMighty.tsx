@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef } from "react";
 import invariant from "invariant";
 import { FormToolkit } from "./FormToolkit";
 import { FormContextProvider } from "./context";
@@ -28,10 +28,6 @@ export const FormMighty: <V>(
 
   const toolkitRef: React.MutableRefObject<Mandatory<typeof givenToolkit>> =
     useRef(givenToolkit ?? new FormToolkit(toolkitOptions));
-
-  useEffect(() => {
-    toolkitRef.current.register();
-  }, []);
 
   return (
     <FormContextProvider value={toolkitRef.current}>
