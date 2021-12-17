@@ -131,3 +131,134 @@ describe("submit", () => {
     consoleSpy.mockRestore();
   });
 });
+
+describe("validate", () => {
+  it("should be called uppon Instantioation, and async with initialValues", async () => {
+    const opt: FormToolkitOptions = {
+      validate: jest.fn().mockImplementation(() => true),
+      initialValues: { a: 5 },
+    };
+
+    new FormToolkit(opt);
+
+    expect(opt.validate).toHaveBeenCalledTimes(0);
+    await waitFor(() => expect(opt.validate).toHaveBeenCalledTimes(1));
+    expect(opt.validate).toHaveBeenCalledWith(opt.initialValues);
+  });
+
+  it("should not be called uppon Instantioation if initialIsValidating=false", async () => {
+    const opt: FormToolkitOptions = {
+      validate: jest.fn().mockImplementation(() => true),
+      initialValues: { a: 5 },
+      initialIsValidating: false,
+    };
+
+    new FormToolkit(opt);
+
+    await waitFor(() => {
+      return new Promise((resolve) => setTimeout(() => resolve(true), 100));
+    });
+    expect(opt.validate).toHaveBeenCalledTimes(0);
+  });
+
+  it("should be called uppon value change with next values", async () => {
+    const opt: FormToolkitOptions = {
+      validate: jest.fn().mockImplementation(() => true),
+      initialValues: { a: 5 },
+    };
+
+    const f = new FormToolkit(opt);
+
+    f.updateValues((v) => {
+      v.a = 6;
+    });
+
+    await waitFor(() => expect(opt.validate).toHaveBeenCalledTimes(2));
+    expect(opt.validate).toHaveBeenCalledWith(f.getState().values);
+  });
+
+  it("should not wait for the previous validation when invoked", async () => {
+    const opt: FormToolkitOptions = {
+      validate: jest
+        .fn()
+        .mockImplementationOnce(async () => {
+          return new Promise((resolve) => {
+            setTimeout(() => resolve(false), 200);
+          });
+        })
+        .mockImplementationOnce(() => false),
+      initialValues: { a: 5 },
+      initialIsValidating: false,
+    };
+
+    const tk = new FormToolkit(opt);
+    tk.validate();
+    tk.validate();
+
+    await waitFor(() => expect(tk.getState().isValid).toBe(false), {
+      timeout: 100,
+    });
+  });
+
+  it("should not override isValid if result came back after a later invocation", async () => {
+    const opt: FormToolkitOptions = {
+      validate: jest
+        .fn()
+        .mockImplementationOnce(async () => {
+          return new Promise((resolve) => {
+            setTimeout(() => resolve(false), 200);
+          });
+        })
+        .mockImplementationOnce(() => true),
+      initialValues: { a: 5 },
+      initialIsValidating: false,
+    };
+
+    const tk = new FormToolkit(opt);
+    const firstCall = tk.validate();
+    tk.validate();
+
+    await firstCall;
+
+    expect(tk.getState().isValid).toBe(true);
+  });
+});
+
+describe("state", () => {
+  describe("isValid", () => {
+    it("should start as true by default", () => {
+      const tk = new FormToolkit();
+      expect(tk.getState().isValid).toBe(true);
+    });
+
+    it("should start as false when given initialIsValid = false", () => {
+      const tk = new FormToolkit({ initialIsValid: false });
+      expect(tk.getState().isValid).toBe(false);
+    });
+
+    it("should change to false if validate returns false", async () => {
+      const tk = new FormToolkit({ validate: () => false });
+
+      expect(tk.getState().isValid).toBe(true);
+      await waitFor(() => expect(tk.getState().isValid).toBe(false));
+    });
+
+    it("should change to false if after value change validation returns false", async () => {
+      const tk = new FormToolkit({
+        validate: jest
+          .fn()
+          .mockImplementationOnce(() => true)
+          .mockImplementationOnce(() => false),
+        initialValues: { a: 5 },
+      });
+
+      expect(tk.getState().isValid).toBe(true);
+
+      tk.updateValues((values) => {
+        values.a = 1000;
+      });
+
+      await waitFor(() => expect(tk.getState().isValid).toBe(false));
+    });
+  });
+});
