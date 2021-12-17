@@ -17,10 +17,9 @@ export class FormToolkit<V extends DefaultFormValues> {
 
   private state!: FormState<V>;
 
-  private validationPromise = Promise.resolve({
-    timestamp: Date.now(),
-    isValid: true,
-  });
+  private validationToken!: string;
+
+  private validationPromise = Promise.resolve(true);
 
   constructor(private readonly options: FormToolkitOptions<V> = {}) {
     this.formKey = uniqueId("form-");
@@ -34,15 +33,7 @@ export class FormToolkit<V extends DefaultFormValues> {
     });
 
     if (this.state.isValidating) {
-      const initialValidationPromise = this.validate();
-      this.validationPromise = new Promise(async (resolve) => {
-        const result = await initialValidationPromise;
-
-        resolve({
-          timestamp: Date.now(),
-          isValid: result,
-        });
-      });
+      this.validationPromise = this.validate();
     }
 
     this.submit = this.submit.bind(this);
@@ -98,7 +89,7 @@ export class FormToolkit<V extends DefaultFormValues> {
   }
 
   async submit() {
-    const { isValid } = await this.validationPromise;
+    const isValid = await this.validationPromise;
 
     if (isValid) {
       this.options.onSubmit?.(this.getState().values);
@@ -106,33 +97,34 @@ export class FormToolkit<V extends DefaultFormValues> {
   }
 
   async validate() {
-    const { values } = this.getState();
+    this.validationPromise = new Promise(async (resolve) => {
+      const validationToken = uniqueId("validation-token");
 
-    const { timestamp, isValid } = await this.validationPromise;
+      this.validationToken = validationToken;
 
-    if (timestamp < Date.now()) {
-      this.validationPromise = new Promise(async (resolve) => {
-        this.updateState((draft) => {
-          draft.isValidating = true;
-        });
+      const { values } = this.getState();
 
-        const result = (await this.options.validate?.(values)) ?? true;
-
-        this.updateState((draft) => {
-          draft.isValidating = false;
-          draft.isValid = result;
-        });
-
-        return resolve({
-          isValid: result,
-          timestamp: Date.now(),
-        });
+      this.updateState((draft) => {
+        draft.isValidating = true;
       });
 
-      return this.validationPromise.then(({ isValid }) => isValid);
-    } else {
-      return isValid;
-    }
+      setImmediate(async () => {
+        const result = (await this.options.validate?.(values)) ?? true;
+
+        if (validationToken === this.validationToken) {
+          this.updateState((draft) => {
+            draft.isValidating = false;
+            draft.isValid = result;
+          });
+
+          return resolve(result);
+        } else {
+          return resolve(this.getState().isValid);
+        }
+      }, 60);
+    });
+
+    return this.validationPromise;
   }
 
   private updateState(
