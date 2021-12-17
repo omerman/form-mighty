@@ -1,3 +1,6 @@
+# Documentation
+For now you are welcome to view the [test report](https://htmlpreview.github.io/?https://github.com/omerman/form-mighty/main/test-report.html)
+
 # Features Roadmap
 
 | Name                             | Done                 |
