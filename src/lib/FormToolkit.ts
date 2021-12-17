@@ -1,13 +1,7 @@
-import { Function, Object, String } from "ts-toolbelt";
+import { Function } from "ts-toolbelt";
 import produce, { Draft, Patch } from "immer";
-import invariant from "invariant";
 import { uniqueId, get } from "lodash";
-import {
-  completeValidation,
-  registerForm,
-  startValidation,
-  updateFormValues,
-} from "./redux/actions";
+import { updateFormState } from "./redux/actions";
 import { store } from "./redux/store";
 import {
   FormState,
@@ -15,11 +9,13 @@ import {
   FormToolkitOptions,
   FieldPath,
 } from "./types";
+import { WritableDraft } from "immer/dist/internal";
+import { DirtyPathsFinder } from "./utils/DirtyPathsFinder";
 
 export class FormToolkit<V extends DefaultFormValues> {
   public readonly formKey: string;
 
-  private readonly initialState: FormState<V>;
+  private state!: FormState<V>;
 
   private validationPromise = Promise.resolve({
     timestamp: Date.now(),
@@ -29,35 +25,21 @@ export class FormToolkit<V extends DefaultFormValues> {
   constructor(private readonly options: FormToolkitOptions<V> = {}) {
     this.formKey = uniqueId("form-");
 
-    this.initialState = {
+    this.updateState({
       values: options.initialValues as V,
       initialValues: options.initialValues ?? {},
       isValid: options.initialIsValid ?? true,
       isValidating: options.initialIsValidating ?? true,
       dirtyFields: {},
-    };
-  }
+    });
 
-  isRegistered() {
-    return store.getState()[this.formKey] !== undefined;
-  }
-
-  register() {
-    invariant(!this.isRegistered(), "FormToolkit - Form already registered!");
-
-    store.dispatch(registerForm(this.formKey, this.initialState));
-
-    if (this.initialState.isValidating) {
+    if (this.state.isValidating) {
       this.validate();
     }
   }
 
   getState(): FormState<V> {
-    if (this.isRegistered()) {
-      return store.getState()[this.formKey];
-    } else {
-      return this.initialState;
-    }
+    return this.state;
   }
 
   isFieldDirty<P extends string>(path: Function.AutoPath<V, P>): boolean {
@@ -74,19 +56,30 @@ export class FormToolkit<V extends DefaultFormValues> {
     arg: (valuesDraft: Draft<V>) => void | V,
     isStartValidation = true
   ) {
-    const patches: Patch[] = [];
+    const appliedPatches: Patch[] = [];
     const nextValues = produce(
       this.getState().values,
       arg as any,
-      (appliedPatches) => {
-        patches.push(...appliedPatches);
+      (_appliedPatches) => {
+        appliedPatches.push(..._appliedPatches);
       }
     );
 
-    if (patches.length > 0) {
-      store.dispatch(
-        updateFormValues(this.formKey, nextValues, patches, isStartValidation)
-      );
+    if (appliedPatches.length > 0) {
+      this.updateState((draft) => {
+        draft.values = nextValues as any;
+        draft.isValidating = isStartValidation;
+
+        Object.assign(
+          draft.dirtyFields,
+          DirtyPathsFinder.find(
+            appliedPatches,
+            draft.values,
+            draft.initialValues,
+            draft.dirtyFields
+          )
+        );
+      });
 
       if (isStartValidation) {
         this.validate();
@@ -101,11 +94,17 @@ export class FormToolkit<V extends DefaultFormValues> {
 
     if (timestamp < Date.now()) {
       this.validationPromise = new Promise(async (resolve) => {
-        store.dispatch(startValidation(this.formKey));
+        this.updateState((draft) => {
+          draft.isValidating = true;
+        });
 
         const result = (await this.options.validate?.(values)) ?? true;
 
-        store.dispatch(completeValidation(this.formKey, result));
+        this.updateState((draft) => {
+          draft.isValidating = false;
+          draft.isValid = result;
+        });
+
         return resolve({
           isValid: result,
           timestamp: Date.now(),
@@ -116,6 +115,16 @@ export class FormToolkit<V extends DefaultFormValues> {
     } else {
       return isValid;
     }
+  }
+
+  private updateState(
+    updater: FormState<V> | ((draft: WritableDraft<FormState<V>>) => void)
+  ) {
+    const nextState =
+      typeof updater === "function" ? produce(this.state, updater) : updater;
+
+    this.state = nextState;
+    store.dispatch(updateFormState(this.formKey, this.state));
   }
 
   subscribe() {
