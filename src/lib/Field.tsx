@@ -12,7 +12,9 @@ export interface FieldProps<FP extends FieldPath.FieldPath<any, any> = string> {
     descriptor: FieldDescriptor<FP>,
     fieldState: { isDirty: boolean; isValid: boolean }
   ) => React.ReactNode;
-  validate?: (value: FieldPath.InferFieldValue<FP>) => boolean;
+  validate?: (
+    value: FieldPath.InferFieldValue<FP>
+  ) => boolean | Promise<boolean>;
 }
 
 export const Field = <FP extends FieldPath.FieldPath<any, any> = string>({
@@ -29,7 +31,12 @@ export const Field = <FP extends FieldPath.FieldPath<any, any> = string>({
   Object.assign(refs.current, { validate });
 
   useEffect(() => {
-    setIsValid(refs.current.validate?.(value) ?? true);
+    let valid = refs.current.validate?.(value) ?? true;
+    Promise.resolve(valid).then((res) => {
+      valid = res;
+      console.log("valid", valid);
+      setIsValid(valid as boolean);
+    });
   }, [value]);
 
   const descriptor: FieldDescriptor<FP> = {
