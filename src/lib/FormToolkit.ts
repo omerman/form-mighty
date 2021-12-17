@@ -33,7 +33,7 @@ export class FormToolkit<V extends DefaultFormValues> {
     });
 
     if (this.state.isValidating) {
-      this.validationPromise = this.validate();
+      this.validate();
     }
 
     this.submit = this.submit.bind(this);
