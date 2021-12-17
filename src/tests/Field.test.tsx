@@ -768,7 +768,7 @@ describe("validation aspect", () => {
             )}
           </FormMighty>
         </FormProvider>
-      )!;
+      );
 
       expect(container.querySelector("code")).toHaveTextContent(/^false$/);
     });
@@ -836,16 +836,15 @@ describe("validation aspect", () => {
 
       const { container } = renderResults!;
 
-      act(() => {
-        userEvent.click(container.querySelector("code")!);
+      userEvent.click(container.querySelector("code")!);
 
-        // The validity change should take affect later.
-        expect(container.querySelector("code")).toHaveTextContent(/^false$/);
-      });
+      expect(container.querySelector("code")).toHaveTextContent(/^false$/);
 
-      await waitFor(() =>
-        expect(container.querySelector("code")).toHaveTextContent(/^true$/)
+      await waitFor(
+        () => new Promise((resolve) => setTimeout(() => resolve(true), 100))
       );
+
+      expect(container.querySelector("code")).toHaveTextContent(/^true$/);
     });
   });
 });

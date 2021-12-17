@@ -31,12 +31,14 @@ export const Field = <FP extends FieldPath.FieldPath<any, any> = string>({
   Object.assign(refs.current, { validate });
 
   useEffect(() => {
-    let valid = refs.current.validate?.(value) ?? true;
-    Promise.resolve(valid).then((res) => {
-      valid = res;
-      console.log("valid", valid);
-      setIsValid(valid as boolean);
-    });
+    let result = refs.current.validate?.(value) ?? true;
+    if (result instanceof Promise) {
+      result.then((valid) => {
+        setIsValid(valid);
+      });
+    } else {
+      setIsValid(result);
+    }
   }, [value]);
 
   const descriptor: FieldDescriptor<FP> = {
