@@ -109,18 +109,24 @@ export class FormToolkit<V extends DefaultFormValues> {
       });
 
       setImmediate(async () => {
-        const result = (await this.options.validate?.(values)) ?? true;
-
-        if (validationToken === this.validationToken) {
-          this.updateState((draft) => {
-            draft.isValidating = false;
-            draft.isValid = result;
-          });
-
-          return resolve(result);
-        } else {
+        // No need to even begin the validation if call already expired.
+        if (validationToken !== this.validationToken) {
           return resolve(this.getState().isValid);
         }
+
+        const result = (await this.options.validate?.(values)) ?? true;
+
+        // Skip if the result is considered expired.
+        if (validationToken !== this.validationToken) {
+          return resolve(this.getState().isValid);
+        }
+
+        this.updateState((draft) => {
+          draft.isValidating = false;
+          draft.isValid = result;
+        });
+
+        return resolve(result);
       }, 60);
     });
 

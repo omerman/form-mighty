@@ -3,6 +3,15 @@ import { FormToolkitOptions } from "src/lib";
 import { FormToolkit } from "src/lib/FormToolkit";
 import { store } from "src/lib/redux/store";
 
+const waitForValidateDebounceTime = () => {
+  const DEBOUNCE_TIME = 60;
+
+  return waitFor(
+    () =>
+      new Promise((resolve) => setTimeout(() => resolve(true), DEBOUNCE_TIME))
+  );
+};
+
 it("Should work with no args", () => {
   new FormToolkit();
 });
@@ -173,8 +182,9 @@ describe("validate", () => {
       v.a = 6;
     });
 
-    await waitFor(() => expect(opt.validate).toHaveBeenCalledTimes(2));
-    expect(opt.validate).toHaveBeenCalledWith(f.getState().values);
+    await waitFor(() =>
+      expect(opt.validate).toHaveBeenCalledWith(f.getState().values)
+    );
   });
 
   it("should not wait for the previous validation when invoked", async () => {
@@ -192,7 +202,11 @@ describe("validate", () => {
     };
 
     const tk = new FormToolkit(opt);
+
     tk.validate();
+
+    await waitForValidateDebounceTime();
+
     tk.validate();
 
     await waitFor(() => expect(tk.getState().isValid).toBe(false), {
@@ -221,6 +235,39 @@ describe("validate", () => {
     await firstCall;
 
     expect(tk.getState().isValid).toBe(true);
+  });
+
+  it("should be called once(debounced) if multiple executive validations are triggered", async () => {
+    const opt: FormToolkitOptions = {
+      validate: jest
+        .fn()
+        .mockImplementationOnce(async () => {
+          return new Promise((resolve) => {
+            setTimeout(() => resolve(false), 200);
+          });
+        })
+        .mockImplementationOnce(async () => {
+          return new Promise((resolve) => {
+            setTimeout(() => resolve(false), 200);
+          });
+        })
+        .mockImplementationOnce(async () => {
+          return new Promise((resolve) => {
+            setTimeout(() => resolve(false), 200);
+          });
+        }),
+      initialValues: { a: 5 },
+      initialIsValidating: false,
+    };
+
+    const tk = new FormToolkit(opt);
+    tk.validate();
+    tk.validate();
+    const lastCall = tk.validate();
+
+    await lastCall;
+
+    expect(opt.validate).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -252,7 +299,7 @@ describe("state", () => {
         initialValues: { a: 5 },
       });
 
-      expect(tk.getState().isValid).toBe(true);
+      await waitForValidateDebounceTime();
 
       tk.updateValues((values) => {
         values.a = 1000;
