@@ -28,7 +28,7 @@
     "build": "react-scripts build",
     "build:lib": "json -I -f tsconfig.json -e 'this.compilerOptions.noEmit=false' && tsc --project tsconfig.json --declaration",
     "test": "react-scripts test",
-    "test:ci": "react-scripts test --watchAll=false --passWithNoTests",
+    "test:ci": "react-scripts test --watchAll=false --passWithNoTests --testResultsProcessor=\"jest-html-reporter\"",
     "typecheck": "tsc --noEmit",
     "format": "prettier --write \"src/\"",
     "format:check": "prettier --check \"src/\"",
@@ -58,6 +58,8 @@
   "devDependencies": {
     "@testing-library/react-hooks": "^7.0.2",
     "@types/invariant": "^2.2.35",
+    "jest-html-reporter": "^3.4.2",
+    "jest-junit": "^13.0.0",
     "json": "^11.0.0",
     "prettier": "^2.5.1",
     "ts-toolbelt": "^9.6.0"
