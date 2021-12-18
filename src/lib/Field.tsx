@@ -1,4 +1,4 @@
-import { get, set } from "lodash";
+import { get, set, uniqueId } from "lodash";
 import React, { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { All } from "./types";
@@ -27,13 +27,17 @@ export const Field = <FP extends FieldPath.FieldPath<any, any> = string>({
   const isDirty = useSelector(() => toolkit.isFieldDirty(fieldPath));
   const [isValid, setIsValid] = useState(true);
 
-  const refs = useRef({ validate });
+  const refs = useRef({ validate, validateToken: "" });
   Object.assign(refs.current, { validate });
 
   useEffect(() => {
-    let result = refs.current.validate?.(value) ?? true;
+    const validateId = (refs.current.validateToken = uniqueId());
+    const result = refs.current.validate?.(value) ?? true;
     if (result instanceof Promise) {
       result.then((valid) => {
+        if (validateId !== refs.current.validateToken) {
+          return;
+        }
         setIsValid(valid);
       });
     } else {
