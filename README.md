@@ -9,6 +9,7 @@
 | FormSubscriber Component | :white_large_square: | :white_check_mark:   |
 | Submit flow              | :white_large_square: | :white_check_mark:   |
 | Dirty state              | :white_large_square: | :white_check_mark:   |
+| Errors                   | :white_large_square: | :white_large_square  |
 | Field Component          | :white_large_square: | :white_check_mark:   |
 | FieldArray Component     | :white_large_square: | :white_large_square: |
 | useInitForm hook         | :white_large_square: | :white_check_mark:   |
