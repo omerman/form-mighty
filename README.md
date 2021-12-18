@@ -9,7 +9,7 @@ For now you are welcome to view the [test report](https://htmlpreview.github.io/
 | Initial values           | :white_large_square: | :white_check_mark:   |
 | Update values            | :white_large_square: | :white_check_mark:   |
 | Global level validation  | :white_large_square: | :white_check_mark:   |
-| Field level validations  | :white_check_mark:   | :white_large_square: |
+| Field level validations  | :white_large_square: | :white_check_mark:   |
 | FormSubscriber Component | :white_large_square: | :white_check_mark:   |
 | Submit flow              | :white_large_square: | :white_check_mark:   |
 | Dirty indicator          | :white_large_square: | :white_check_mark:   |
