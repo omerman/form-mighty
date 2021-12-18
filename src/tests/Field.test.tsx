@@ -112,7 +112,7 @@ describe("onChange", () => {
   });
 });
 
-describe("dirty indicator", () => {
+describe("isDirty", () => {
   it("should be supplied (and false) when first rendering", async () => {
     const { container } = render(
       <FormProvider>
