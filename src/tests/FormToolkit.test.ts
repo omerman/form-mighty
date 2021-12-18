@@ -229,6 +229,9 @@ describe("validation aspect", () => {
 
       const tk = new FormToolkit(opt);
       const firstCall = tk.validate();
+
+      await waitForTime(VALIDATE_DEBOUNCE_TIME);
+
       tk.validate();
 
       await firstCall;
