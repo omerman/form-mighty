@@ -1,4 +1,5 @@
 import { waitFor } from "@testing-library/react";
+import { set } from "lodash";
 import { FormToolkitOptions } from "src/lib";
 import { FormToolkit } from "src/lib/FormToolkit";
 import { store } from "src/lib/redux/store";
@@ -303,6 +304,292 @@ describe("validation aspect", () => {
       });
 
       await waitFor(() => expect(tk.getState().isValid).toBe(false));
+    });
+  });
+});
+
+describe("dirty aspect", () => {
+  it("should be false by default", async () => {
+    const tk = new FormToolkit({
+      initialValues: { a: 5 },
+    });
+
+    expect(tk.isFieldDirty("a")).toBe(false);
+  });
+
+  describe("leaf", () => {
+    it("should become dirty if field changes", async () => {
+      const tk = new FormToolkit({
+        initialValues: { a: 5 },
+      });
+
+      tk.updateValues((draft) => {
+        draft.a = 1000;
+      });
+
+      expect(tk.isFieldDirty("a")).toBe(true);
+    });
+
+    it("should become clean if field is restored to initial value", async () => {
+      const tk = new FormToolkit({
+        initialValues: { a: "5" },
+      });
+
+      tk.updateValues((draft) => {
+        draft.a = "1000";
+      });
+
+      tk.updateValues((draft) => {
+        draft.a = "5";
+      });
+
+      expect(tk.isFieldDirty("a")).toBe(false);
+    });
+
+    it("should be dirty if field path is new and triggers change", () => {
+      type MyForm = { a?: { b: { c: number } } };
+
+      const tk = new FormToolkit<MyForm>({
+        initialValues: {},
+      });
+
+      tk.updateValues((draft) => {
+        set(draft, tk.path("a.b.c"), 1000);
+      });
+
+      expect(tk.isFieldDirty("a.b.c")).toBe(true);
+    });
+
+    it("should become dirty if parent object value becomes undefined", async () => {
+      type MyForm = { a?: { b: number } };
+
+      const tk = new FormToolkit<MyForm>({
+        initialValues: { a: { b: 5 } },
+      });
+
+      tk.updateValues((draft) => {
+        draft.a = undefined;
+      });
+
+      expect(tk.isFieldDirty("a.b")).toBe(true);
+    });
+
+    it("should become dirty if parent array value becomes undefined", async () => {
+      type MyForm = { a?: string[] };
+
+      const tk = new FormToolkit<MyForm>({
+        initialValues: { a: ["5"] },
+      });
+
+      tk.updateValues((draft) => {
+        draft.a = undefined;
+      });
+
+      expect(tk.isFieldDirty("a.0")).toBe(true);
+    });
+
+    it("should become dirty if array prev sibling is deleted", async () => {
+      type MyForm = { a?: string[] };
+
+      const tk = new FormToolkit<MyForm>({
+        initialValues: { a: ["1", "2"] },
+      });
+
+      tk.updateValues((draft) => {
+        draft.a = ["2"];
+      });
+
+      expect(tk.isFieldDirty("a.1")).toBe(true);
+    });
+  });
+
+  describe("parent object", () => {
+    it("should become dirty if child's field changes", () => {
+      const tk = new FormToolkit({
+        initialValues: {
+          value: { nestedValue: 5 },
+        },
+      });
+
+      tk.updateValues((draft) => {
+        draft.value.nestedValue = 1000;
+      });
+
+      expect(tk.isFieldDirty("value")).toBe(true);
+    });
+
+    it("should become clean if child's field is restored to initial value", () => {
+      const tk = new FormToolkit({
+        initialValues: {
+          value: { nestedValue: "5" },
+        },
+      });
+
+      tk.updateValues((draft) => {
+        draft.value.nestedValue = "1000";
+      });
+
+      tk.updateValues((draft) => {
+        draft.value.nestedValue = "5";
+      });
+
+      expect(tk.isFieldDirty("value")).toBe(false);
+    });
+
+    it("should remain dirty if only one child's field is restored to initial value", () => {
+      const tk = new FormToolkit({
+        initialValues: {
+          value: { nestedValue: "5", nestedValue2: "5" },
+        },
+      });
+
+      tk.updateValues((draft) => {
+        draft.value.nestedValue = "1000";
+        draft.value.nestedValue2 = "1000";
+      });
+
+      tk.updateValues((draft) => {
+        draft.value.nestedValue = "5";
+      });
+
+      expect(tk.isFieldDirty("value")).toBe(true);
+    });
+
+    it("should start dirty if child is new and parent didnt exist as well", () => {
+      type MyForm = { a?: { b: { c: number } } };
+
+      const tk = new FormToolkit<MyForm>({ initialValues: {} });
+
+      tk.updateValues((draft) => {
+        set(draft, tk.path("a.b.c"), 1000);
+      });
+
+      expect(tk.isFieldDirty("a")).toBe(true);
+    });
+
+    it("should become dirty if child is deleted - using delete", () => {
+      type MyForm = { a: { toBeDeleted?: number } };
+
+      const tk = new FormToolkit<MyForm>({
+        initialValues: {
+          a: { toBeDeleted: 1 },
+        },
+      });
+
+      tk.updateValues((draft) => {
+        delete draft.a.toBeDeleted;
+      });
+
+      expect(tk.isFieldDirty("a")).toBe(true);
+    });
+
+    it("should become dirty if child is deleted - using undefined assignment", () => {
+      type MyForm = { a: { toBeDeleted?: number } };
+
+      const tk = new FormToolkit<MyForm>({
+        initialValues: {
+          a: { toBeDeleted: 1 },
+        },
+      });
+
+      tk.updateValues((draft) => {
+        draft.a.toBeDeleted = undefined;
+      });
+
+      expect(tk.isFieldDirty("a")).toBe(true);
+    });
+  });
+
+  describe("parent array", () => {
+    it("should become dirty if child's field changes", () => {
+      const tk = new FormToolkit({
+        initialValues: {
+          value: ["5"],
+        },
+      });
+
+      tk.updateValues((draft) => {
+        draft.value[0] = "1000";
+      });
+
+      expect(tk.isFieldDirty("value")).toBe(true);
+    });
+
+    it("should become clean if child's field is restored to initial value", () => {
+      const tk = new FormToolkit({
+        initialValues: {
+          value: ["5"],
+        },
+      });
+
+      tk.updateValues((draft) => {
+        draft.value[0] = "1000";
+      });
+
+      tk.updateValues((draft) => {
+        draft.value[0] = "5";
+      });
+
+      expect(tk.isFieldDirty("value")).toBe(false);
+    });
+
+    it("should remain dirty if only one child's field is restored to initial value", () => {
+      const tk = new FormToolkit({
+        initialValues: {
+          value: ["5", "5"],
+        },
+      });
+
+      tk.updateValues((draft) => {
+        draft.value[0] = "1000";
+        draft.value[1] = "1000";
+      });
+
+      tk.updateValues((draft) => {
+        draft.value[0] = "5";
+      });
+
+      expect(tk.isFieldDirty("value")).toBe(true);
+    });
+
+    it("should start dirty if child is new and parent didnt exist as well", () => {
+      type MyForm = { a?: Array<{ b: number }> };
+
+      const tk = new FormToolkit<MyForm>({ initialValues: {} });
+
+      tk.updateValues((draft) => {
+        set(draft, tk.path("a.0"), { b: 5 });
+      });
+
+      expect(tk.isFieldDirty("a")).toBe(true);
+    });
+
+    it("should become dirty if child is deleted - using splice", () => {
+      const tk = new FormToolkit({
+        initialValues: {
+          a: [{ b: 1 }, { b: 2 }],
+        },
+      });
+
+      tk.updateValues((arg) => {
+        arg.a.splice(0, 1);
+      });
+
+      expect(tk.isFieldDirty("a")).toBe(true);
+    });
+
+    it("should become dirty if child is deleted - using assignment", () => {
+      const tk = new FormToolkit({
+        initialValues: {
+          a: [{ b: 1 }, { b: 2 }],
+        },
+      });
+
+      tk.updateValues((arg) => {
+        arg.a = arg.a.filter((_, i) => i !== 0);
+      });
+
+      expect(tk.isFieldDirty("a")).toBe(true);
     });
   });
 });
