@@ -4,6 +4,7 @@ import { Field } from "src/lib/Field";
 import { FormMighty } from "src/lib/FormMighty";
 import { FormProvider } from "src/lib/FormProvider";
 import { FormToolkit } from "src/lib/FormToolkit";
+import { waitForTime } from "./utils";
 
 it("should render", () => {
   render(
@@ -883,12 +884,7 @@ describe("validation aspect", () => {
       userEvent.click(container.querySelector("code")!);
       userEvent.click(container.querySelector("code")!);
 
-      await waitFor(
-        () =>
-          new Promise((resolve) =>
-            setTimeout(() => resolve(true), FIRST_VALIDATE_DELAY_TIME + 1)
-          )
-      );
+      await waitForTime(FIRST_VALIDATE_DELAY_TIME + 1);
 
       expect(container.querySelector("code")).toHaveTextContent(/^true$/);
     });

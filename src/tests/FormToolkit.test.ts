@@ -2,6 +2,7 @@ import { waitFor } from "@testing-library/react";
 import { FormToolkitOptions } from "src/lib";
 import { FormToolkit } from "src/lib/FormToolkit";
 import { store } from "src/lib/redux/store";
+import { waitForTime } from "./utils";
 
 it("Should work with no args", () => {
   new FormToolkit();
@@ -133,14 +134,7 @@ describe("submit", () => {
 });
 
 describe("validation aspect", () => {
-  const waitForValidateDebounce = () => {
-    const DEBOUNCE_TIME = 60;
-
-    return waitFor(
-      () =>
-        new Promise((resolve) => setTimeout(() => resolve(true), DEBOUNCE_TIME))
-    );
-  };
+  const VALIDATE_DEBOUNCE_TIME = 60;
 
   describe("validate", () => {
     it("should be called uppon Instantioation, and async with initialValues", async () => {
@@ -152,7 +146,9 @@ describe("validation aspect", () => {
       new FormToolkit(opt);
 
       expect(opt.validate).toHaveBeenCalledTimes(0);
-      await waitFor(() => expect(opt.validate).toHaveBeenCalledTimes(1));
+      await waitForTime(VALIDATE_DEBOUNCE_TIME);
+
+      expect(opt.validate).toHaveBeenCalledTimes(1);
       expect(opt.validate).toHaveBeenCalledWith(opt.initialValues);
     });
 
@@ -165,9 +161,8 @@ describe("validation aspect", () => {
 
       new FormToolkit(opt);
 
-      await waitFor(() => {
-        return new Promise((resolve) => setTimeout(() => resolve(true), 100));
-      });
+      await waitForTime(VALIDATE_DEBOUNCE_TIME);
+
       expect(opt.validate).toHaveBeenCalledTimes(0);
     });
 
@@ -189,12 +184,14 @@ describe("validation aspect", () => {
     });
 
     it("should not wait for the previous validation when invoked", async () => {
+      const FIRST_VALIDATE_DELAY = 200;
+
       const opt: FormToolkitOptions = {
         validate: jest
           .fn()
           .mockImplementationOnce(async () => {
             return new Promise((resolve) => {
-              setTimeout(() => resolve(false), 200);
+              setTimeout(() => resolve(false), FIRST_VALIDATE_DELAY);
             });
           })
           .mockImplementationOnce(() => false),
@@ -206,13 +203,13 @@ describe("validation aspect", () => {
 
       tk.validate();
 
-      await waitForValidateDebounce();
+      await waitForTime(VALIDATE_DEBOUNCE_TIME);
 
       tk.validate();
 
-      await waitFor(() => expect(tk.getState().isValid).toBe(false), {
-        timeout: 100,
-      });
+      await waitForTime(FIRST_VALIDATE_DELAY / 2);
+
+      expect(tk.getState().isValid).toBe(false);
     });
 
     it("should not override isValid if result came back after a later invocation", async () => {
@@ -299,7 +296,7 @@ describe("validation aspect", () => {
         initialValues: { a: 5 },
       });
 
-      await waitForValidateDebounce();
+      await waitForTime(VALIDATE_DEBOUNCE_TIME);
 
       tk.updateValues((values) => {
         values.a = 1000;
