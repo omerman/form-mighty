@@ -840,8 +840,54 @@ describe("validation aspect", () => {
 
       expect(container.querySelector("code")).toHaveTextContent(/^false$/);
 
+      await waitFor(() =>
+        expect(container.querySelector("code")).toHaveTextContent(/^true$/)
+      );
+    });
+
+    it("should get valid status based on last change", async () => {
+      const FIRST_VALIDATE_DELAY_TIME = 100;
+
+      const validateFn = jest
+        .fn()
+        .mockReturnValueOnce(
+          new Promise((resolve) => {
+            setTimeout(() => {
+              resolve(false);
+            }, FIRST_VALIDATE_DELAY_TIME);
+          })
+        )
+        .mockReturnValueOnce(true);
+      let renderResults: RenderResult;
+
+      act(() => {
+        renderResults = render(
+          <FormProvider>
+            <FormMighty initialValues={{ a: 5 }}>
+              {(tk) => (
+                <Field fieldPath={tk.path("a")} validate={validateFn}>
+                  {({ onChange }, { isValid }) => (
+                    <code onClick={() => onChange(1000)}>
+                      {String(isValid)}
+                    </code>
+                  )}
+                </Field>
+              )}
+            </FormMighty>
+          </FormProvider>
+        );
+      });
+
+      const { container } = renderResults!;
+
+      userEvent.click(container.querySelector("code")!);
+      userEvent.click(container.querySelector("code")!);
+
       await waitFor(
-        () => new Promise((resolve) => setTimeout(() => resolve(true), 100))
+        () =>
+          new Promise((resolve) =>
+            setTimeout(() => resolve(true), FIRST_VALIDATE_DELAY_TIME + 1)
+          )
       );
 
       expect(container.querySelector("code")).toHaveTextContent(/^true$/);
