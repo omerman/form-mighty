@@ -8,4 +8,5 @@ export interface FormState<V extends DefaultFormValues = DefaultFormValues> {
   dirtyFields: {
     [key: string]: boolean;
   };
+  isSubmitting: boolean;
 }

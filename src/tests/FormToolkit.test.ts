@@ -3,7 +3,7 @@ import { set } from "lodash";
 import { FormToolkitOptions } from "src/lib";
 import { FormToolkit } from "src/lib/FormToolkit";
 import { store } from "src/lib/redux/store";
-import { waitForTime } from "./utils";
+import { waitForExpression, waitForTime } from "./utils";
 
 it("Should work with no args", () => {
   new FormToolkit();
@@ -24,113 +24,170 @@ it("Should be disposed from store uppon disposal", () => {
   expect(store.getState()[tk.formKey]).not.toBeDefined();
 });
 
-describe("submit", () => {
-  it("should call given onSubmit option", async () => {
-    const opts: FormToolkitOptions = {
-      onSubmit: jest.fn(),
-      initialIsValidating: false,
-    };
+describe("submit aspect", () => {
+  describe("submit", () => {
+    it("should call given onSubmit option", async () => {
+      const opts: FormToolkitOptions = {
+        onSubmit: jest.fn(),
+        initialIsValidating: false,
+      };
 
-    const tk = new FormToolkit(opts);
+      const tk = new FormToolkit(opts);
 
-    tk.submit();
-    await waitFor(() => expect(opts.onSubmit).toHaveBeenCalledTimes(1));
-  });
-
-  it("should call given onSubmit option after validating is complete", async () => {
-    const opts: FormToolkitOptions = {
-      onSubmit: jest.fn(),
-      validate: () =>
-        new Promise((resolve) => setTimeout(() => resolve(true), 100)),
-    };
-
-    const tk = new FormToolkit(opts);
-
-    tk.submit();
-    expect(opts.onSubmit).not.toHaveBeenCalled();
-
-    await waitFor(() => expect(opts.onSubmit).toHaveBeenCalledTimes(1));
-  });
-
-  it("should call given onSubmit option with values", async () => {
-    const opts: FormToolkitOptions = {
-      onSubmit: jest.fn(),
-      initialValues: { ok: 5 },
-      initialIsValidating: false,
-    };
-
-    const tk = new FormToolkit(opts);
-
-    tk.submit();
-    await waitFor(() =>
-      expect(opts.onSubmit).toHaveBeenCalledWith(tk.getState().values)
-    );
-  });
-
-  it("should call given onSubmit option with values after changed", async () => {
-    const opts: FormToolkitOptions = {
-      onSubmit: jest.fn(),
-      initialValues: { ok: 5 },
-    };
-
-    const tk = new FormToolkit(opts);
-
-    tk.updateValues((values) => {
-      values.ok = 1000;
+      tk.submit();
+      await waitFor(() => expect(opts.onSubmit).toHaveBeenCalledTimes(1));
     });
 
-    tk.submit();
+    it("should call given onSubmit option after validating is complete", async () => {
+      const opts: FormToolkitOptions = {
+        onSubmit: jest.fn(),
+        validate: () =>
+          new Promise((resolve) => setTimeout(() => resolve(true), 100)),
+      };
 
-    await waitFor(() =>
-      expect(opts.onSubmit).toHaveBeenCalledWith(tk.getState().values)
-    );
+      const tk = new FormToolkit(opts);
+
+      tk.submit();
+      expect(opts.onSubmit).not.toHaveBeenCalled();
+
+      await waitFor(() => expect(opts.onSubmit).toHaveBeenCalledTimes(1));
+    });
+
+    it("should call given onSubmit option with values", async () => {
+      const opts: FormToolkitOptions = {
+        onSubmit: jest.fn(),
+        initialValues: { ok: 5 },
+        initialIsValidating: false,
+      };
+
+      const tk = new FormToolkit(opts);
+
+      tk.submit();
+      await waitFor(() =>
+        expect(opts.onSubmit).toHaveBeenCalledWith(tk.getState().values)
+      );
+    });
+
+    it("should call given onSubmit option with values after changed", async () => {
+      const opts: FormToolkitOptions = {
+        onSubmit: jest.fn(),
+        initialValues: { ok: 5 },
+      };
+
+      const tk = new FormToolkit(opts);
+
+      tk.updateValues((values) => {
+        values.ok = 1000;
+      });
+
+      tk.submit();
+
+      await waitFor(() =>
+        expect(opts.onSubmit).toHaveBeenCalledWith(tk.getState().values)
+      );
+    });
+
+    it("should not call given onSubmit option if form is invalid", () => {
+      const opts: FormToolkitOptions = {
+        onSubmit: jest.fn(),
+        initialIsValid: false,
+      };
+
+      const tk = new FormToolkit(opts);
+
+      tk.submit();
+
+      expect(opts.onSubmit).not.toHaveBeenCalled();
+    });
+
+    it("should not call given onSubmit option if form will be invalid", async () => {
+      const opts: FormToolkitOptions = {
+        onSubmit: jest.fn(),
+        initialIsValid: true,
+        validate: () => false,
+      };
+
+      const tk = new FormToolkit(opts);
+
+      tk.submit();
+
+      await waitFor(() => expect(tk.getState().isValidating).toBe(false));
+
+      expect(opts.onSubmit).not.toHaveBeenCalled();
+    });
+
+    it("should wait for onSubmit to finish if async", async () => {
+      let isSubmitFinished = false;
+      const opts: FormToolkitOptions = {
+        onSubmit: jest.fn().mockImplementation(
+          () =>
+            new Promise<void>((resolve) =>
+              setTimeout(() => {
+                isSubmitFinished = true;
+                resolve();
+              }, 200)
+            )
+        ),
+      };
+
+      const tk = new FormToolkit(opts);
+
+      await tk.submit();
+
+      expect(isSubmitFinished).toBe(true);
+    });
+
+    it("should be bound to the class instace", async () => {
+      const consoleSpy = jest
+        .spyOn(console, "error")
+        .mockImplementation(() => {});
+
+      const opts: FormToolkitOptions = {
+        onSubmit: jest.fn(),
+        initialIsValid: true,
+        validate: () => false,
+      };
+
+      const { submit } = new FormToolkit(opts);
+
+      await expect(submit()).resolves.not.toThrow();
+
+      consoleSpy.mockRestore();
+    });
   });
 
-  it("should not call given onSubmit option if form is invalid", () => {
-    const opts: FormToolkitOptions = {
-      onSubmit: jest.fn(),
-      initialIsValid: false,
-    };
+  describe("state.isSubmitting", () => {
+    it("should be false by default", () => {
+      const tk = new FormToolkit();
+      expect(tk.getState().isSubmitting).toBe(false);
+    });
 
-    const tk = new FormToolkit(opts);
+    it("should become true after submit and validation completed", async () => {
+      const tk = new FormToolkit({
+        onSubmit: () =>
+          new Promise((resolve) => {
+            setTimeout(resolve, 200);
+          }),
+      });
 
-    tk.submit();
+      tk.submit();
+      await waitForExpression(() => tk.getState().isValidating, false);
 
-    expect(opts.onSubmit).not.toHaveBeenCalled();
-  });
+      expect(tk.getState().isSubmitting).toBe(true);
+    });
 
-  it("should not call given onSubmit option if form will be invalid", async () => {
-    const opts: FormToolkitOptions = {
-      onSubmit: jest.fn(),
-      initialIsValid: true,
-      validate: () => false,
-    };
+    it("should not become true after submit if form is invald", async () => {
+      const tk = new FormToolkit({ initialIsValid: false });
+      tk.submit();
+      await waitForExpression(() => tk.getState().isValidating, false);
+      expect(tk.getState().isSubmitting).toBe(false);
+    });
 
-    const tk = new FormToolkit(opts);
-
-    tk.submit();
-
-    await waitFor(() => expect(tk.getState().isValidating).toBe(false));
-
-    expect(opts.onSubmit).not.toHaveBeenCalled();
-  });
-
-  it("should be bound to the class instace", async () => {
-    const consoleSpy = jest
-      .spyOn(console, "error")
-      .mockImplementation(() => {});
-
-    const opts: FormToolkitOptions = {
-      onSubmit: jest.fn(),
-      initialIsValid: true,
-      validate: () => false,
-    };
-
-    const { submit } = new FormToolkit(opts);
-
-    await expect(submit()).resolves.not.toThrow();
-
-    consoleSpy.mockRestore();
+    it("should become false after submition ends", async () => {
+      const tk = new FormToolkit();
+      await tk.submit();
+      expect(tk.getState().isSubmitting).toBe(false);
+    });
   });
 });
 
@@ -281,6 +338,12 @@ describe("validation aspect", () => {
 
     it("should start as false if initialIsValid=false", () => {
       const tk = new FormToolkit({ initialIsValid: false });
+      expect(tk.getState().isValid).toBe(false);
+    });
+
+    it("should remain false if isInvalid=false and valdate not supplied", async () => {
+      const tk = new FormToolkit({ initialIsValid: false });
+      await waitForExpression(() => tk.getState().isValidating, false);
       expect(tk.getState().isValid).toBe(false);
     });
 

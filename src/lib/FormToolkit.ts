@@ -19,7 +19,7 @@ export class FormToolkit<V extends DefaultFormValues> {
 
   private validationToken!: string;
 
-  private validationPromise = Promise.resolve(true);
+  private validationPromise!: Promise<boolean>;
 
   constructor(private readonly options: FormToolkitOptions<V> = {}) {
     this.formKey = uniqueId("form-");
@@ -30,10 +30,13 @@ export class FormToolkit<V extends DefaultFormValues> {
       isValid: options.initialIsValid ?? true,
       isValidating: options.initialIsValidating ?? true,
       dirtyFields: {},
+      isSubmitting: false,
     });
 
     if (this.state.isValidating) {
       this.validate();
+    } else {
+      this.validationPromise = Promise.resolve(this.state.isValid);
     }
 
     this.submit = this.submit.bind(this);
@@ -92,7 +95,13 @@ export class FormToolkit<V extends DefaultFormValues> {
     const isValid = await this.validationPromise;
 
     if (isValid) {
-      this.options.onSubmit?.(this.getState().values);
+      this.updateState((draft) => {
+        draft.isSubmitting = true;
+      });
+      await this.options.onSubmit?.(this.getState().values);
+      this.updateState((draft) => {
+        draft.isSubmitting = false;
+      });
     }
   }
 
@@ -114,7 +123,8 @@ export class FormToolkit<V extends DefaultFormValues> {
           return resolve(this.getState().isValid);
         }
 
-        const result = (await this.options.validate?.(values)) ?? true;
+        const result =
+          (await this.options.validate?.(values)) ?? this.getState().isValid;
 
         // Skip if the result is considered expired.
         if (validationToken !== this.validationToken) {

@@ -7,5 +7,5 @@ export interface FormToolkitOptions<
   validate?: (values: V) => boolean | Promise<boolean>;
   initialIsValid?: boolean;
   initialIsValidating?: boolean;
-  onSubmit?: (values: V) => void;
+  onSubmit?: (values: V) => void | Promise<void>;
 }
