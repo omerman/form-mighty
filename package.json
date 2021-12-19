@@ -5,8 +5,8 @@
   "types": "./dist/lib/index.d.ts",
   "scripts": {
     "build": "react-scripts build",
-    "build-storybook": "build-storybook",
     "build:lib": "json -I -f tsconfig.json -e 'this.compilerOptions.noEmit=false' && tsc --project tsconfig.json --declaration",
+    "build:storybook": "build-storybook",
     "eject": "react-scripts eject",
     "format": "prettier --write \"src/\"",
     "format:check": "prettier --check \"src/\"",

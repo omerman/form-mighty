@@ -1,4 +1,4 @@
-name: Test and publish
+name: Library CI CD
 
 on: [push]
 
@@ -28,6 +28,23 @@ jobs:
         run: yarn install
       - name: Build
         run: yarn build:lib
-      - uses: JS-DevTools/npm-publish@v1
+      - name: Publish 🚀
+        uses: JS-DevTools/npm-publish@v1
         with:
           token: ${{ secrets.NPM_TOKEN }}
+
+  github-pages:
+    needs: [test]
+    if: github.ref == 'refs/heads/storybook'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install dependencies
+        run: yarn install
+      - name: Build
+        run: yarn build:storybook
+      - name: Deploy 🚀
+        uses: JamesIves/github-pages-deploy-action@4.1.7
+        with:
+          branch: gh-pages # The branch the action should deploy to.
+          folder: storybook-static # The folder the action should deploy.
