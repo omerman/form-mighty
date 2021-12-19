@@ -3,45 +3,21 @@
   "version": "0.1.4",
   "main": "./dist/lib/index.js",
   "types": "./dist/lib/index.d.ts",
-  "dependencies": {
-    "@testing-library/jest-dom": "^5.11.4",
-    "@testing-library/react": "^11.1.0",
-    "@testing-library/user-event": "^12.1.10",
-    "@types/jest": "^26.0.15",
-    "@types/lodash": "^4.14.177",
-    "@types/node": "^12.0.0",
-    "@types/react": "^17.0.0",
-    "@types/react-dom": "^17.0.0",
-    "immer": "^9.0.7",
-    "invariant": "^2.2.4",
-    "lodash": "^4.17.21",
-    "react": "^17.0.2",
-    "react-dom": "^17.0.2",
-    "react-redux": "^7.2.6",
-    "react-scripts": "4.0.3",
-    "redux": "^4.1.2",
-    "typescript": "^4.1.2",
-    "web-vitals": "^1.0.1"
-  },
   "scripts": {
-    "start": "react-scripts start",
     "build": "react-scripts build",
     "build:lib": "json -I -f tsconfig.json -e 'this.compilerOptions.noEmit=false' && tsc --project tsconfig.json --declaration",
-    "test": "react-scripts test",
-    "test:ci": "react-scripts test --watchAll=false --passWithNoTests --testResultsProcessor=\"jest-html-reporter\"",
-    "typecheck": "tsc --noEmit",
+    "eject": "react-scripts eject",
     "format": "prettier --write \"src/\"",
     "format:check": "prettier --check \"src/\"",
     "lint": "eslint \"src/*.ts\"",
-    "lint:fix": "npm run lint -- --fix",
     "lint:err": "npm run lint -- --quiet",
-    "eject": "react-scripts eject"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
+    "lint:fix": "npm run lint -- --fix",
+    "start": "react-scripts start",
+    "storybook": "start-storybook -p 6006",
+    "build-storybook": "build-storybook",
+    "test": "react-scripts test",
+    "test:ci": "react-scripts test --watchAll=false --passWithNoTests --testResultsProcessor=\"jest-html-reporter\"",
+    "typecheck": "tsc --noEmit"
   },
   "browserslist": {
     "production": [
@@ -55,12 +31,50 @@
       "last 1 safari version"
     ]
   },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "dependencies": {
+    "immer": "^9.0.7",
+    "invariant": "^2.2.4",
+    "lodash": "^4.17.21",
+    "redux": "^4.1.2",
+    "web-vitals": "^1.0.1"
+  },
   "devDependencies": {
+    "@storybook/addon-actions": "^6.4.0",
+    "@storybook/addon-essentials": "^6.4.0",
+    "@storybook/addon-interactions": "^6.4.0",
+    "@storybook/addon-links": "^6.4.0",
+    "@storybook/node-logger": "^6.4.0",
+    "@storybook/preset-create-react-app": "^3.1.7",
+    "@storybook/react": "^6.4.0",
+    "@storybook/testing-library": "^0.0.7",
+    "@storybook/testing-react": "^1.0.0",
+    "@testing-library/jest-dom": "^5.11.4",
+    "@testing-library/react": "^11.1.0",
     "@testing-library/react-hooks": "^7.0.2",
+    "@testing-library/user-event": "^12.1.10",
     "@types/invariant": "^2.2.35",
+    "@types/jest": "^26.0.15",
+    "@types/lodash": "^4.14.177",
+    "@types/node": "^12.0.0",
+    "@types/react": "^17.0.0",
+    "@types/react-dom": "^17.0.0",
     "jest-html-reporter": "^3.4.2",
     "json": "^11.0.0",
     "prettier": "^2.5.1",
-    "ts-toolbelt": "^9.6.0"
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-redux": "^7.2.6",
+    "react-scripts": "4.0.3",
+    "ts-toolbelt": "^9.6.0",
+    "typescript": "^4.1.2"
+  },
+  "peerDependencies": {
+    "react": "^17.0.2"
   }
 }
