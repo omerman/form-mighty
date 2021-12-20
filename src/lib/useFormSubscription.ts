@@ -27,5 +27,5 @@ export const useFormSubscription = <
   return useSelector(
     () => subscriptionFn((tk ?? contextTk).getState()),
     shallowEqual
-  );
+  ) as T;
 };
