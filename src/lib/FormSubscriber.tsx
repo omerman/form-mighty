@@ -1,9 +1,9 @@
 import { FormState, DefaultFormValues } from "./types";
 import invariant from "invariant";
-import { useForm } from "./useForm";
-import { useSelector, shallowEqual } from "react-redux";
 import { useEffect, useRef } from "react";
 import { FormToolkit } from "./FormToolkit";
+import { useForm } from "./useForm";
+import { useFormSubscription } from "./useFormSubscription";
 
 export interface FormSubscriberProps<V extends DefaultFormValues, T> {
   subscription: (state: FormState<V>) => T;
@@ -12,24 +12,22 @@ export interface FormSubscriberProps<V extends DefaultFormValues, T> {
   children?: (subscriptonResult: T, toolkit: FormToolkit<V>) => React.ReactNode;
 }
 
-export const FormSubscriber: <V extends DefaultFormValues, T>(
-  props: FormSubscriberProps<V, T>
-) => React.ReactElement<any, any> | null = ({
+export const FormSubscriber = <V extends DefaultFormValues, T>({
   subscription,
   onMount,
   onChange,
   children,
-}) => {
+}: FormSubscriberProps<V, T>) => {
   invariant(
     onMount ?? onChange ?? children,
     "FormSubscriber - Must include one of [onMount, onChange, children] props"
   );
+  const formToolkit = useForm<V>();
 
-  const formToolkit = useForm<any>();
-
-  const subscriptonResult = useSelector(() => {
-    return subscription(formToolkit.getState());
-  }, shallowEqual);
+  const subscriptonResult = useFormSubscription<V, T>(
+    formToolkit,
+    subscription
+  );
 
   const mountedRef = useRef(false);
   const refs = useRef({ onChange, onMount });

@@ -1,5 +1,5 @@
 import { renderHook } from "@testing-library/react-hooks";
-import { FormMighty, FormProvider } from "src/lib";
+import { FormMighty, FormProvider, FormState } from "src/lib";
 import { FormToolkit } from "src/lib/FormToolkit";
 import { useFormSubscription } from "src/lib/useFormSubscription";
 
@@ -86,7 +86,8 @@ it("should return a form state using a given subscriptionFn", async () => {
 });
 
 it("should accept subscriptionFn as first argument and use context's toolkit", async () => {
-  const tk = new FormToolkit({
+  type MyForm = { value: number };
+  const tk = new FormToolkit<MyForm>({
     initialValues: { value: 1 },
   });
 
@@ -99,7 +100,7 @@ it("should accept subscriptionFn as first argument and use context's toolkit", a
   };
 
   const { result } = renderHook(
-    () => useFormSubscription((state) => state.values.value),
+    () => useFormSubscription((state: FormState<MyForm>) => state.values.value),
     {
       wrapper: Wrapper,
     }

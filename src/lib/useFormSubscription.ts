@@ -12,7 +12,7 @@ export const useFormSubscription = <
     | []
     | [FormToolkit<V>?, ((state: FormState<V>) => T)?]
     | [(state: FormState<V>) => T]
-) => {
+): T => {
   const contextTk = useForm<V>();
 
   const tk = args[0] instanceof FormToolkit ? args[0] : undefined;
