@@ -24,7 +24,7 @@ export class FormToolkit<V extends DefaultFormValues> {
   constructor(private readonly options: FormToolkitOptions<V> = {}) {
     this.formKey = uniqueId("form-");
 
-    this.updateState({
+    this.setState({
       values: options.initialValues as V,
       initialValues: options.initialValues ?? {},
       isValid: options.initialIsValid ?? true,
@@ -70,7 +70,7 @@ export class FormToolkit<V extends DefaultFormValues> {
     );
 
     if (appliedPatches.length > 0) {
-      this.updateState((draft) => {
+      this.setState((draft) => {
         draft.values = nextValues as any;
         draft.isValidating = isStartValidation;
 
@@ -95,11 +95,11 @@ export class FormToolkit<V extends DefaultFormValues> {
     const isValid = await this.validationPromise;
 
     if (isValid) {
-      this.updateState((draft) => {
+      this.setState((draft) => {
         draft.isSubmitting = true;
       });
       await this.options.onSubmit?.(this.getState().values);
-      this.updateState((draft) => {
+      this.setState((draft) => {
         draft.isSubmitting = false;
       });
     }
@@ -113,7 +113,7 @@ export class FormToolkit<V extends DefaultFormValues> {
 
       const { values } = this.getState();
 
-      this.updateState((draft) => {
+      this.setState((draft) => {
         draft.isValidating = true;
       });
 
@@ -131,7 +131,7 @@ export class FormToolkit<V extends DefaultFormValues> {
           return resolve(this.getState().isValid);
         }
 
-        this.updateState((draft) => {
+        this.setState((draft) => {
           draft.isValidating = false;
           draft.isValid = result;
         });
@@ -143,7 +143,7 @@ export class FormToolkit<V extends DefaultFormValues> {
     return this.validationPromise;
   }
 
-  private updateState(
+  private setState(
     updater: FormState<V> | ((draft: WritableDraft<FormState<V>>) => void)
   ) {
     const nextState =
