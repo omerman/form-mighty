@@ -241,7 +241,9 @@ describe("validation aspect", () => {
         </FormProvider>
       );
 
-      userEvent.click(container.querySelector("code")!);
+      act(() => {
+        userEvent.click(container.querySelector("code")!);
+      });
 
       expect(validate).toHaveBeenCalledTimes(2);
     });
