@@ -6,8 +6,8 @@ import { FieldPath } from "./types/FieldPath";
 import { useForm } from "./useForm";
 import { EventUtils } from "./utils/EventUtils";
 
-export interface FieldProps<FP extends FieldPath.FieldPath<any, any> = string> {
-  fieldPath: FP extends string ? FP : string;
+export interface FieldProps<FP extends FieldPath.FieldPath | string = string> {
+  fieldPath: FP;
   children: (
     descriptor: FieldDescriptor<FP>,
     fieldState: { isDirty: boolean; isValid: boolean }
@@ -17,14 +17,14 @@ export interface FieldProps<FP extends FieldPath.FieldPath<any, any> = string> {
   ) => boolean | Promise<boolean>;
 }
 
-export const Field = <FP extends FieldPath.FieldPath<any, any> = string>({
+export const Field = <FP extends FieldPath.FieldPath | string = string>({
   children,
   fieldPath,
   validate,
 }: FieldProps<FP>) => {
   const toolkit = useForm();
   const value = useSelector(() => get(toolkit.getState().values, fieldPath));
-  const isDirty = useSelector(() => toolkit.isFieldDirty(fieldPath));
+  const isDirty = useSelector(() => toolkit.isFieldDirty(fieldPath as string));
   const [isValid, setIsValid] = useState(true);
 
   const refs = useRef({ validate, validateToken: "" });
@@ -61,12 +61,11 @@ export const Field = <FP extends FieldPath.FieldPath<any, any> = string>({
   return <>{children(descriptor, { isDirty, isValid })}</>;
 };
 
-export type FieldDescriptor<FP extends FieldPath.FieldPath<any, any> | string> =
-  {
-    value: FieldPath.InferFieldValue<FP>;
-    onChange: (
-      e:
-        | (string extends FP ? All : FieldPath.InferFieldValue<FP>)
-        | React.ChangeEvent<HTMLInputElement>
-    ) => void;
-  };
+export type FieldDescriptor<FP extends FieldPath.FieldPath | string> = {
+  value: FP extends FieldPath.FieldPath ? FieldPath.InferFieldValue<FP> : any;
+  onChange: (
+    e:
+      | (FP extends FieldPath.FieldPath ? FieldPath.InferFieldValue<FP> : All)
+      | React.ChangeEvent<HTMLInputElement>
+  ) => void;
+};

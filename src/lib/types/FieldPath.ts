@@ -3,8 +3,8 @@ import { DefaultFormValues } from ".";
 
 export namespace FieldPath {
   export type FieldPath<
-    V extends DefaultFormValues,
-    Path extends string
+    V extends DefaultFormValues = DefaultFormValues,
+    Path extends string = string
   > = Path & { $$V: V };
 
   export type InferFieldValue<FP extends FieldPath<any, any>> =

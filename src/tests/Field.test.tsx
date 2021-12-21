@@ -10,7 +10,7 @@ it("should render", () => {
   render(
     <FormProvider>
       <FormMighty initialValues={{}}>
-        <Field fieldPath="">{() => <code>Hi</code>}</Field>
+        <Field fieldPath="">{({ value, onChange }) => <code>Hi</code>}</Field>
       </FormMighty>
     </FormProvider>
   );
@@ -44,7 +44,7 @@ it("should render field value matching the given path", async () => {
       <FormMighty initialValues={{ value: 5 }}>
         {(tk) => (
           <Field fieldPath={tk.path("value")}>
-            {({ value }) => <code>{value}</code>}
+            {({ value, onChange }) => <code>{value}</code>}
           </Field>
         )}
       </FormMighty>
