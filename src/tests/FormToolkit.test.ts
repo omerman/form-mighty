@@ -374,6 +374,12 @@ describe("validation aspect", () => {
   });
 });
 
+describe("field validation aspect", () => {
+  describe("registerFieldValidation", () => {});
+
+  describe("state.fieldValidations", () => {});
+});
+
 describe("dirty aspect", () => {
   it("should be false by default", async () => {
     const tk = new FormToolkit({
