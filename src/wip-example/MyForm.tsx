@@ -1,6 +1,6 @@
 import { uniqueId } from "lodash";
 import { useEffect, useRef } from "react";
-import { FormState, FormMighty, FormSubscriber, useInitForm } from "../lib";
+import { FormState, FormMighty, FormSubscribtion, useInitForm } from "../lib";
 
 const RenderChecker: React.FC<{ scope?: string }> = ({ scope, children }) => {
   const countRef = useRef(1);
@@ -49,7 +49,7 @@ export const MyForm: React.FC = () => {
             <RenderChecker scope="root > content">
               <code>Initial State: {JSON.stringify(toolkit.getState())}</code>
               <br />
-              <FormSubscriber
+              <FormSubscribtion
                 subscription={({
                   values,
                   isValid,
@@ -82,8 +82,8 @@ export const MyForm: React.FC = () => {
                     </button>
                   </RenderChecker>
                 )}
-              </FormSubscriber>
-              <FormSubscriber
+              </FormSubscribtion>
+              <FormSubscribtion
                 subscription={(state: FormState<MyFormType>) => state}
               >
                 {(entireState) => (
@@ -91,7 +91,7 @@ export const MyForm: React.FC = () => {
                     <code>{JSON.stringify(entireState)}</code>
                   </RenderChecker>
                 )}
-              </FormSubscriber>
+              </FormSubscribtion>
             </RenderChecker>
           );
         }}

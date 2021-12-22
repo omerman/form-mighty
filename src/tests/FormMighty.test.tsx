@@ -1,5 +1,5 @@
 import { render, waitFor } from "@testing-library/react";
-import { FormProvider, FormState, FormSubscriber } from "src/lib";
+import { FormProvider, FormState, FormSubscribtion } from "src/lib";
 import { FormMighty } from "src/lib/FormMighty";
 import { FormToolkit } from "src/lib/FormToolkit";
 
@@ -93,9 +93,9 @@ describe("formToolkit", () => {
     const { container } = render(
       <FormProvider>
         <FormMighty initialIsValid={true} validate={() => false}>
-          <FormSubscriber subscription={(fs: FormState) => fs.isValid}>
+          <FormSubscribtion subscription={(fs: FormState) => fs.isValid}>
             {(isValid) => <code>{String(isValid)}</code>}
-          </FormSubscriber>
+          </FormSubscribtion>
         </FormMighty>
       </FormProvider>
     );

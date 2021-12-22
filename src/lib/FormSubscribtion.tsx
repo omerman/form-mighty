@@ -5,22 +5,22 @@ import { FormToolkit } from "./FormToolkit";
 import { useForm } from "./useForm";
 import { useFormSubscription } from "./useFormSubscription";
 
-export interface FormSubscriberProps<V extends DefaultFormValues, T> {
+export interface FormSubscribtionProps<V extends DefaultFormValues, T> {
   subscription: (state: FormState<V>) => T;
   onMount?: (subscriptonResult: T, toolkit: FormToolkit<V>) => void;
   onChange?: (subscriptonResult: T, toolkit: FormToolkit<V>) => void;
   children?: (subscriptonResult: T, toolkit: FormToolkit<V>) => React.ReactNode;
 }
 
-export const FormSubscriber = <V extends DefaultFormValues, T>({
+export const FormSubscribtion = <V extends DefaultFormValues, T>({
   subscription,
   onMount,
   onChange,
   children,
-}: FormSubscriberProps<V, T>) => {
+}: FormSubscribtionProps<V, T>) => {
   invariant(
     onMount ?? onChange ?? children,
-    "FormSubscriber - Must include one of [onMount, onChange, children] props"
+    "FormSubscribtion - Must include one of [onMount, onChange, children] props"
   );
   const formToolkit = useForm<V>();
 
