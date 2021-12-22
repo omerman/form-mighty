@@ -4,16 +4,17 @@ import { FormToolkit } from "./FormToolkit";
 import { DefaultFormValues, FormState } from "./types";
 import { useForm } from "./useForm";
 
-export const useFormSubscription = <
-  V extends DefaultFormValues,
-  T = FormState<V>
->(
-  ...args:
-    | []
-    | [FormToolkit<V>?, ((state: FormState<V>) => T)?]
-    | [(state: FormState<V>) => T]
-): T => {
-  const contextTk = useForm<V>();
+export interface UseFormSubscription {
+  <V extends DefaultFormValues, T = FormState<V>>(
+    ...args:
+      | []
+      | [FormToolkit<V>?, ((state: FormState<V>) => T)?]
+      | [(state: FormState<V>) => T]
+  ): T;
+}
+
+export const useFormSubscription: UseFormSubscription = (...args) => {
+  const contextTk = useForm<any>();
 
   const tk = args[0] instanceof FormToolkit ? args[0] : undefined;
   const subscriptionFn =
@@ -27,5 +28,5 @@ export const useFormSubscription = <
   return useSelector(
     () => subscriptionFn((tk ?? contextTk).getState()),
     shallowEqual
-  ) as T;
+  ) as any;
 };

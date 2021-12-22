@@ -1,10 +1,10 @@
 import { enablePatches } from "immer";
 
-export { FormProvider } from "./FormProvider";
-export { FormMighty } from "./FormMighty";
-export { FormSubscribtion } from "./FormSubscribtion";
-export { useInitForm } from "./useInitForm";
-export { useFormSubscription } from "./useFormSubscription";
+export * from "./FormProvider";
+export * from "./FormMighty";
+export * from "./FormSubscribtion";
+export * from "./useInitForm";
+export * from "./useFormSubscription";
 export type { FormState, FormToolkitOptions } from "./types";
 
 enablePatches();
