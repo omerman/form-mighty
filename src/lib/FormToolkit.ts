@@ -11,6 +11,7 @@ import {
 } from "./types";
 import { WritableDraft } from "immer/dist/internal";
 import { DirtyPathsFinder } from "./utils/DirtyPathsFinder";
+import { DottedPaths } from "./types/DottedPath";
 
 export class FormToolkit<V extends DefaultFormValues> {
   public readonly formKey: string;
@@ -46,13 +47,11 @@ export class FormToolkit<V extends DefaultFormValues> {
     return this.state;
   }
 
-  isFieldDirty<P extends string>(path: Function.AutoPath<V, P>): boolean {
+  isFieldDirty<P extends DottedPaths<V>>(path: P): boolean {
     return get(this.getState().dirtyFields, path) ?? false;
   }
 
-  path<P extends string>(
-    path: Function.AutoPath<V, P>
-  ): FieldPath.FieldPath<V, P> {
+  path<P extends DottedPaths<V>>(path: P): FieldPath.FieldPath<V, P> {
     return path as any as FieldPath.FieldPath<V, P>;
   }
 
