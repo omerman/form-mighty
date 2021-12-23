@@ -1,4 +1,3 @@
-import { Function } from "ts-toolbelt";
 import produce, { Draft, Patch } from "immer";
 import { uniqueId, get } from "lodash";
 import { disposeForm, updateFormState } from "./redux/actions";
