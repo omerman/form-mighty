@@ -469,8 +469,8 @@ describe("dirty aspect", () => {
     });
   });
 
-  describe("parent object", () => {
-    it("should become dirty if child's field changes", () => {
+  describe("object", () => {
+    it("should become dirty if property changes", () => {
       const tk = new FormToolkit({
         initialValues: {
           value: { nestedValue: 5 },
@@ -484,7 +484,7 @@ describe("dirty aspect", () => {
       expect(tk.isFieldDirty("value")).toBe(true);
     });
 
-    it("should become clean if child's field is restored to initial value", () => {
+    it("should become clean if property is restored to initial value", () => {
       const tk = new FormToolkit({
         initialValues: {
           value: { nestedValue: "5" },
@@ -502,7 +502,7 @@ describe("dirty aspect", () => {
       expect(tk.isFieldDirty("value")).toBe(false);
     });
 
-    it("should remain dirty if only one child's field is restored to initial value", () => {
+    it("should remain dirty if only some properties are restored to initial value", () => {
       const tk = new FormToolkit({
         initialValues: {
           value: { nestedValue: "5", nestedValue2: "5" },
@@ -521,7 +521,7 @@ describe("dirty aspect", () => {
       expect(tk.isFieldDirty("value")).toBe(true);
     });
 
-    it("should start dirty if child is new and parent didnt exist as well", () => {
+    it("should start dirty if setting a property value of a non existing path", () => {
       type MyForm = { a?: { b: { c: number } } };
 
       const tk = new FormToolkit<MyForm>({ initialValues: {} });
@@ -533,7 +533,7 @@ describe("dirty aspect", () => {
       expect(tk.isFieldDirty("a")).toBe(true);
     });
 
-    it("should become dirty if child is deleted - using delete", () => {
+    it("should become dirty if property is deleted - using delete", () => {
       type MyForm = { a: { toBeDeleted?: number } };
 
       const tk = new FormToolkit<MyForm>({
@@ -549,7 +549,7 @@ describe("dirty aspect", () => {
       expect(tk.isFieldDirty("a")).toBe(true);
     });
 
-    it("should become dirty if child is deleted - using undefined assignment", () => {
+    it("should become dirty if property is deleted - using undefined assignment", () => {
       type MyForm = { a: { toBeDeleted?: number } };
 
       const tk = new FormToolkit<MyForm>({
@@ -566,8 +566,8 @@ describe("dirty aspect", () => {
     });
   });
 
-  describe("parent array", () => {
-    it("should become dirty if child's field changes", () => {
+  describe("array", () => {
+    it("should become dirty if item changes", () => {
       const tk = new FormToolkit({
         initialValues: {
           value: ["5"],
@@ -581,7 +581,7 @@ describe("dirty aspect", () => {
       expect(tk.isFieldDirty("value")).toBe(true);
     });
 
-    it("should become clean if child's field is restored to initial value", () => {
+    it("should become clean if item is restored to initial value", () => {
       const tk = new FormToolkit({
         initialValues: {
           value: ["5"],
@@ -599,7 +599,7 @@ describe("dirty aspect", () => {
       expect(tk.isFieldDirty("value")).toBe(false);
     });
 
-    it("should remain dirty if only one child's field is restored to initial value", () => {
+    it("should remain dirty if only some items are restored to initial value", () => {
       const tk = new FormToolkit({
         initialValues: {
           value: ["5", "5"],
@@ -618,7 +618,7 @@ describe("dirty aspect", () => {
       expect(tk.isFieldDirty("value")).toBe(true);
     });
 
-    it("should start dirty if child is new and parent didnt exist as well", () => {
+    it("should start dirty if setting an item value of a non existing path", () => {
       type MyForm = { a?: Array<{ b: number }> };
 
       const tk = new FormToolkit<MyForm>({ initialValues: {} });
@@ -630,7 +630,7 @@ describe("dirty aspect", () => {
       expect(tk.isFieldDirty("a")).toBe(true);
     });
 
-    it("should become dirty if child is deleted - using splice", () => {
+    it("should become dirty if item is deleted - using splice", () => {
       const tk = new FormToolkit({
         initialValues: {
           a: [{ b: 1 }, { b: 2 }],
@@ -644,7 +644,7 @@ describe("dirty aspect", () => {
       expect(tk.isFieldDirty("a")).toBe(true);
     });
 
-    it("should become dirty if child is deleted - using assignment", () => {
+    it("should become dirty if item is deleted - using assignment", () => {
       const tk = new FormToolkit({
         initialValues: {
           a: [{ b: 1 }, { b: 2 }],
