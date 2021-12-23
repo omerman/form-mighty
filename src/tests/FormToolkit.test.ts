@@ -454,7 +454,7 @@ describe("dirty aspect", () => {
       expect(tk.isFieldDirty("a.0")).toBe(true);
     });
 
-    it("should become dirty if array prev sibling is deleted", async () => {
+    it("should become dirty if parent array prev sibling is deleted", async () => {
       type MyForm = { a?: string[] };
 
       const tk = new FormToolkit<MyForm>({
@@ -656,6 +656,28 @@ describe("dirty aspect", () => {
       });
 
       expect(tk.isFieldDirty("a")).toBe(true);
+    });
+  });
+
+  describe("arrayItemsKeyMap", () => {
+    it("should be used and not mark items that moved as dirty", () => {
+      type MyForm = {
+        arr: Array<{ id: string }>;
+      };
+
+      const tk = new FormToolkit<MyForm>({
+        initialValues: { arr: [{ id: "1" }, { id: "2" }] },
+        arrayItemsKeyMap: {
+          arr: "id",
+        },
+      });
+
+      tk.updateValues((draft) => {
+        draft.arr.reverse(); // For the items to swap places.
+      });
+
+      expect(tk.isFieldDirty("arr.0")).toBe(false);
+      expect(tk.isFieldDirty("arr.1")).toBe(false);
     });
   });
 });

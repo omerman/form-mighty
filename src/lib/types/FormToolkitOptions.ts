@@ -1,4 +1,5 @@
 import { DefaultFormValues } from ".";
+import { ArrayItemsKeyMap } from "./ArrayItemsKeyMap";
 
 export interface FormToolkitOptions<
   V extends DefaultFormValues = DefaultFormValues
@@ -8,4 +9,5 @@ export interface FormToolkitOptions<
   initialIsValid?: boolean;
   initialIsValidating?: boolean;
   onSubmit?: (values: V) => void | Promise<void>;
+  arrayItemsKeyMap?: ArrayItemsKeyMap<V>;
 }
