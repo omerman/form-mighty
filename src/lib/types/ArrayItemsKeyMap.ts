@@ -1,27 +1,22 @@
 import { Object, String } from "ts-toolbelt";
 import { DottedPaths } from "./DottedPath";
 
-type ArrayDefinitionsObjectHelper<V> = {
-  [Key in keyof V as V[Key] extends Array<any>
-    ? Key
-    : never]: V[Key] extends Array<any>
-    ? ArrayDefinitionsObjectHelper<V[Key][number]>
-    : never;
+type FlattenArraysDeep<V> = {
+  [Key in keyof V]: V[Key] extends Array<any>
+    ? FlattenArraysDeep<V[Key][number]> & {
+        _$OBJECTS_ARRAY_MARKER_$_: V[Key][number] extends object ? true : false;
+      }
+    : FlattenArraysDeep<V[Key]>;
 };
 
-// TODO - think of a way to clean this insane type, that works btw ;)~;
 export type ArrayItemsKeyMap<V> = {
-  [Path in DottedPaths<ArrayDefinitionsObjectHelper<V>>]?: keyof Exclude<
-    Object.Path<
-      V,
-      [
-        ...String.Split<
-          String.Join<String.Split<Path, ".">, `.${number}.`>,
-          "."
-        >,
-        number
-      ]
-    >,
-    undefined
+  [Path in DottedPaths<FlattenArraysDeep<V>> as Object.Path<
+    FlattenArraysDeep<V>,
+    String.Split<Path, ".">
+  > extends { _$OBJECTS_ARRAY_MARKER_$_: true }
+    ? Path
+    : never]?: Exclude<
+    keyof Object.Path<FlattenArraysDeep<V>, String.Split<Path, ".">>,
+    "_$OBJECTS_ARRAY_MARKER_$_"
   >;
 };
