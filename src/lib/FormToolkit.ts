@@ -76,9 +76,10 @@ export class FormToolkit<V extends DefaultFormValues> {
           draft.dirtyFields,
           DirtyPathsFinder.find(
             appliedPatches,
-            draft.values,
-            draft.initialValues,
-            draft.dirtyFields
+            nextValues,
+            this.state.initialValues,
+            this.state.dirtyFields,
+            (this.options.arrayItemsKeyMap ?? {}) as Record<string, string>
           )
         );
       });

@@ -660,7 +660,7 @@ describe("dirty aspect", () => {
   });
 
   describe("arrayItemsKeyMap", () => {
-    it("should be used and not mark items that moved as dirty", () => {
+    it("should prevent swapped array items from being marked as dirty", () => {
       type MyForm = {
         arr: Array<{ id: string }>;
       };

@@ -7,7 +7,8 @@ export class DirtyPathsFinder {
     appliedPatches: Omit<Patch, "op">[],
     appliedValues: any,
     initialValues: any,
-    currentDirtyPaths: Record<string, boolean>
+    currentDirtyPaths: Record<string, boolean>,
+    arrayItemsKeyMap: Record<string, string>
   ) {
     const touchedPathList = PatchUtils.buildVisitedPaths(appliedPatches)
       .sort((a, b) => (a < b ? 1 : -1))
@@ -16,8 +17,16 @@ export class DirtyPathsFinder {
     const nextDirtyFields: Record<string, boolean> = {};
 
     touchedPathList.forEach((path) => {
-      const initialValue = get(initialValues, path);
+      const isRootItem = path.lastIndexOf(".") === -1;
+      const parentPath = isRootItem ? "" : path.slice(0, path.lastIndexOf("."));
+      const arrayKey = arrayItemsKeyMap[parentPath];
+
       const value = get(appliedValues, path);
+      const initialValue = arrayKey
+        ? (get(initialValues, parentPath) as any[]).find(
+            (x) => x[arrayKey] === value[arrayKey]
+          )
+        : get(initialValues, path);
 
       const markAsDirty = (path: string) => {
         nextDirtyFields[path] = true;
