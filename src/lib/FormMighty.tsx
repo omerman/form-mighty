@@ -24,9 +24,8 @@ export const FormMighty = <V extends DefaultFormValues>({
     "FormMighty - Must include one of [component, children] props"
   );
 
-  // TODO - check if TS is better and try and remove the `as any` here ;)
   const toolkitRef: React.MutableRefObject<FormToolkit<V>> = useRef(
-    givenToolkit ?? new FormToolkit(toolkitOptions as any)
+    givenToolkit ?? new FormToolkit(toolkitOptions)
   );
 
   return (
