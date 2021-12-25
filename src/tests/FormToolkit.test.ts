@@ -685,8 +685,8 @@ describe("dirty aspect", () => {
 
       const tk = new FormToolkit<MyForm>({
         initialValues: { arr: [{ id: "1" }, { id: "2" }] },
-        arrayItemsKeyMap: {
-          arr: "id",
+        buildArraysIdentity: (initialValues, builder) => {
+          builder.add(initialValues.arr, "id");
         },
       });
 
@@ -697,68 +697,5 @@ describe("dirty aspect", () => {
       expect(tk.isFieldDirty("arr.0")).toBe(false);
       expect(tk.isFieldDirty("arr.1")).toBe(false);
     });
-
-    it("should not cause update to throw if array didn't exist", () => {
-      type MyForm = {
-        arr: Array<{ id: string }>;
-      };
-
-      const tk = new FormToolkit<MyForm>({
-        arrayItemsKeyMap: {
-          arr: "id",
-        },
-      });
-
-      expect(() =>
-        tk.updateValues((draft) => {
-          draft.arr = [{ id: "1" }];
-        })
-      ).not.toThrow();
-    });
-
-    it("should prevent deep swapped array items from being marked as dirty", () => {
-      type MyForm = {
-        arr: Array<{ id: string; nestedArr: Array<{ id: string }> }>;
-      };
-
-      const tk = new FormToolkit<MyForm>({
-        initialValues: {
-          arr: [{ id: "1", nestedArr: [{ id: "1" }, { id: "2" }] }],
-        },
-        arrayItemsKeyMap: {
-          "arr.nestedArr": "id",
-        },
-      });
-
-      tk.updateValues((draft) => {
-        draft.arr[0].nestedArr.reverse(); // For the items to swap places.
-      });
-
-      expect(tk.isFieldDirty("arr.0.nestedArr.0")).toBe(false);
-      expect(tk.isFieldDirty("arr.0.nestedArr.1")).toBe(false);
-    });
-
-    // TODO - think of a way to solve this.
-    // it("should prevent deep swapped array items from being marked as dirty if has parent object with number keys", () => {
-    //   type MyForm = {
-    //     objectWithNumKeys: Record<string, { arr: Array<{ id: string }> }>;
-    //   };
-
-    //   const tk = new FormToolkit<MyForm>({
-    //     initialValues: {
-    //       objectWithNumKeys: { 0: { arr: [{ id: "1" }, { id: "2" }] } },
-    //     },
-    //     arrayItemsKeyMap: {
-    //       "objectWithNumKeys.0.arr": "id",
-    //     },
-    //   });
-
-    //   tk.updateValues((draft) => {
-    //     draft.objectWithNumKeys[0].arr.reverse(); // For the items to swap places.
-    //   });
-
-    //   expect(tk.isFieldDirty(`objectWithNumKeys.0.arr.0`)).toBe(false);
-    //   expect(tk.isFieldDirty("objectWithNumKeys.0.arr.1")).toBe(false);
-    // });
   });
 });

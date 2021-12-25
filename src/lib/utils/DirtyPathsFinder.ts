@@ -1,5 +1,6 @@
 import { Patch } from "immer";
 import { get, size, differenceBy, entries, concat } from "lodash";
+import { ArraysIdentity } from "../ArraysIdentity";
 import { PatchUtils } from "./PatchUtils";
 
 export class DirtyPathsFinder {
@@ -8,7 +9,7 @@ export class DirtyPathsFinder {
     appliedValues: any,
     initialValues: any,
     currentDirtyPaths: Record<string, boolean>,
-    arrayItemsKeyMap: Record<string, string>
+    arraysIdentity: ArraysIdentity
   ) {
     const touchedPathList = PatchUtils.buildVisitedPaths(appliedPatches)
       .sort((a, b) => (a < b ? 1 : -1))
@@ -19,12 +20,15 @@ export class DirtyPathsFinder {
     touchedPathList.forEach((path) => {
       const parentPath = path.slice(0, path.lastIndexOf("."));
 
-      const arrayItemsKeyMapPath = parentPath.replace(/\.\d+\./g, ".");
-      const arrayKey = arrayItemsKeyMap[arrayItemsKeyMapPath];
+      const parentInitialValue = get(initialValues, parentPath);
+
+      const arrayKey = Array.isArray(parentInitialValue)
+        ? arraysIdentity.get(parentInitialValue)
+        : undefined;
 
       const value = get(appliedValues, path);
       const initialValue = arrayKey
-        ? (get(initialValues, parentPath) as any[])?.find(
+        ? (parentInitialValue as any[])?.find(
             (x) => x[arrayKey] === value[arrayKey]
           )
         : get(initialValues, path);

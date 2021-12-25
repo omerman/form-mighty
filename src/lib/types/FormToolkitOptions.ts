@@ -1,5 +1,5 @@
 import { DefaultFormValues } from ".";
-import { ArrayItemsKeyMap } from "./ArrayItemsKeyMap";
+import { ArraysIdentityBuilder } from "./ArraysIdentityBuilder";
 
 export interface FormToolkitOptions<
   V extends DefaultFormValues = DefaultFormValues
@@ -9,5 +9,8 @@ export interface FormToolkitOptions<
   initialIsValid?: boolean;
   initialIsValidating?: boolean;
   onSubmit?: (values: V) => void | Promise<void>;
-  arrayItemsKeyMap?: ArrayItemsKeyMap<V>;
+  buildArraysIdentity?: (
+    initialValues: Partial<V>,
+    builder: ArraysIdentityBuilder
+  ) => void;
 }
