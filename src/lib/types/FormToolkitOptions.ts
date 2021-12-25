@@ -1,5 +1,5 @@
 import { DefaultFormValues } from ".";
-import { ArraysIdentityBuilder } from "./ArraysIdentityBuilder";
+import { ArraysIdentity } from "../ArraysIdentity";
 
 export interface FormToolkitOptions<
   V extends DefaultFormValues = DefaultFormValues
@@ -11,6 +11,6 @@ export interface FormToolkitOptions<
   onSubmit?: (values: V) => void | Promise<void>;
   buildArraysIdentity?: (
     initialValues: Partial<V>,
-    builder: ArraysIdentityBuilder
+    builder: ArraysIdentity
   ) => void;
 }
