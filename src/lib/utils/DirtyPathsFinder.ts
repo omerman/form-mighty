@@ -17,13 +17,14 @@ export class DirtyPathsFinder {
     const nextDirtyFields: Record<string, boolean> = {};
 
     touchedPathList.forEach((path) => {
-      const isRootItem = path.lastIndexOf(".") === -1;
-      const parentPath = isRootItem ? "" : path.slice(0, path.lastIndexOf("."));
-      const arrayKey = arrayItemsKeyMap[parentPath];
+      const parentPath = path.slice(0, path.lastIndexOf("."));
+
+      const arrayItemsKeyMapPath = parentPath.replace(/\.\d+\./g, ".");
+      const arrayKey = arrayItemsKeyMap[arrayItemsKeyMapPath];
 
       const value = get(appliedValues, path);
       const initialValue = arrayKey
-        ? (get(initialValues, parentPath) as any[]).find(
+        ? (get(initialValues, parentPath) as any[])?.find(
             (x) => x[arrayKey] === value[arrayKey]
           )
         : get(initialValues, path);

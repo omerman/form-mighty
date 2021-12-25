@@ -25,7 +25,7 @@ export class FormToolkit<V extends DefaultFormValues> {
     this.formKey = uniqueId("form-");
 
     this.setState({
-      values: options.initialValues as V,
+      values: (options.initialValues ?? {}) as V,
       initialValues: options.initialValues ?? {},
       isValid: options.initialIsValid ?? true,
       isValidating: options.initialIsValidating ?? true,
