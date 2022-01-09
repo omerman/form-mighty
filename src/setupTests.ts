@@ -6,3 +6,7 @@ import "@testing-library/jest-dom";
 import { enablePatches } from "immer";
 
 enablePatches();
+
+beforeEach(() => {
+  jest.clearAllMocks();
+});

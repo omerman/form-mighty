@@ -4,11 +4,6 @@ import { FormToolkit } from "src/lib/FormToolkit";
 
 jest.mock("src/lib/FormToolkit");
 
-beforeEach(() => {
-  // Clear all instances and calls to constructor and all methods:
-  (FormToolkit as jest.Mock).mockClear();
-});
-
 it("should create FormToolkit", () => {
   const { result } = renderHook(() => useInitForm());
 
