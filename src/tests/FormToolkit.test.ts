@@ -13,6 +13,11 @@ it("Should work with empty args", () => {
   new FormToolkit({});
 });
 
+it("Should init values as empty object if initialValues are not supplied", () => {
+  const tk = new FormToolkit();
+  expect(tk.getState().values).toEqual({});
+});
+
 it("Should be stored by formKey uppon creation", () => {
   const tk = new FormToolkit();
   expect(store.getState()[tk.formKey]).toBe(tk.getState());
@@ -22,6 +27,19 @@ it("Should be disposed from store uppon disposal", () => {
   const tk = new FormToolkit();
   tk.dispose();
   expect(store.getState()[tk.formKey]).not.toBeDefined();
+});
+
+describe("updateValues", () => {
+  it("Should work", () => {
+    const tk = new FormToolkit({
+      initialValues: { a: 5 },
+    });
+    tk.updateValues((draft) => {
+      draft.a = 6;
+    });
+
+    expect(tk.getState().values).toEqual({ a: 6 });
+  });
 });
 
 describe("submit aspect", () => {
@@ -454,7 +472,7 @@ describe("dirty aspect", () => {
       expect(tk.isFieldDirty("a.0")).toBe(true);
     });
 
-    it("should become dirty if array prev sibling is deleted", async () => {
+    it("should become dirty if parent array prev sibling is deleted", async () => {
       type MyForm = { a?: string[] };
 
       const tk = new FormToolkit<MyForm>({
@@ -656,6 +674,28 @@ describe("dirty aspect", () => {
       });
 
       expect(tk.isFieldDirty("a")).toBe(true);
+    });
+  });
+
+  describe("arrayItemsKeyMap", () => {
+    it("should prevent swapped array items from being marked as dirty", () => {
+      type MyForm = {
+        arr: Array<{ id: string }>;
+      };
+
+      const tk = new FormToolkit<MyForm>({
+        initialValues: { arr: [{ id: "1" }, { id: "2" }] },
+        buildArraysIdentity: (initialValues, builder) => {
+          builder.add(initialValues.arr, "id");
+        },
+      });
+
+      tk.updateValues((draft) => {
+        draft.arr.reverse(); // For the items to swap places.
+      });
+
+      expect(tk.isFieldDirty("arr.0")).toBe(false);
+      expect(tk.isFieldDirty("arr.1")).toBe(false);
     });
   });
 });

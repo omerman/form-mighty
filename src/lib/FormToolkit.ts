@@ -11,6 +11,7 @@ import {
 import { WritableDraft } from "immer/dist/internal";
 import { DirtyPathsFinder } from "./utils/DirtyPathsFinder";
 import { DottedPaths } from "./types/DottedPath";
+import { ArraysIdentity } from "./ArraysIdentity";
 
 export class FormToolkit<V extends DefaultFormValues> {
   public readonly formKey: string;
@@ -21,17 +22,25 @@ export class FormToolkit<V extends DefaultFormValues> {
 
   private validationPromise!: Promise<boolean>;
 
+  private arraysIdentity!: ArraysIdentity;
+
   constructor(private readonly options: FormToolkitOptions<V> = {}) {
     this.formKey = uniqueId("form-");
 
     this.setState({
-      values: options.initialValues as V,
+      values: (options.initialValues ?? {}) as V,
       initialValues: options.initialValues ?? {},
       isValid: options.initialIsValid ?? true,
       isValidating: options.initialIsValidating ?? true,
       dirtyFields: {},
       isSubmitting: false,
     });
+
+    this.arraysIdentity = new ArraysIdentity();
+    options.buildArraysIdentity?.(
+      this.state.initialValues,
+      this.arraysIdentity
+    );
 
     if (this.state.isValidating) {
       this.validate();
@@ -76,9 +85,10 @@ export class FormToolkit<V extends DefaultFormValues> {
           draft.dirtyFields,
           DirtyPathsFinder.find(
             appliedPatches,
-            draft.values,
-            draft.initialValues,
-            draft.dirtyFields
+            nextValues,
+            this.state.initialValues,
+            this.state.dirtyFields,
+            this.arraysIdentity
           )
         );
       });
