@@ -2,7 +2,7 @@ import { FormState, DefaultFormValues } from "./types";
 import invariant from "invariant";
 import { FormToolkit } from "./FormToolkit";
 import { useForm } from "./useForm";
-import { useFormSubscription } from "./useFormSubscription";
+import { useFormSelector } from "./useFormSelector";
 
 export interface FormSubscribtionProps<V extends DefaultFormValues, T> {
   subscription: (state: FormState<V>) => T;
@@ -16,10 +16,7 @@ export const FormSubscribtion = <V extends DefaultFormValues, T>({
   invariant(children, "FormSubscribtion - Must include children");
   const formToolkit = useForm<V>();
 
-  const subscriptonResult = useFormSubscription<V, T>(
-    formToolkit,
-    subscription
-  );
+  const subscriptonResult = useFormSelector<V, T>(formToolkit, subscription);
 
   return <>{children(subscriptonResult, formToolkit)}</>;
 };

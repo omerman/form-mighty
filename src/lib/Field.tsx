@@ -1,6 +1,6 @@
 import { get, set, uniqueId } from "lodash";
 import React, { useEffect, useRef, useState } from "react";
-import { useFormSubscription } from ".";
+import { useFormSelector } from ".";
 import { All } from "./types";
 import { FieldPath } from "./types/FieldPath";
 import { useForm } from "./useForm";
@@ -23,8 +23,8 @@ export const Field = <FP extends FieldPath.FieldPath | string = string>({
   validate,
 }: FieldProps<FP>) => {
   const toolkit = useForm();
-  const value = useFormSubscription((state) => get(state.values, fieldPath));
-  const isDirty = useFormSubscription(() =>
+  const value = useFormSelector((state) => get(state.values, fieldPath));
+  const isDirty = useFormSelector(() =>
     toolkit.isFieldDirty(fieldPath as string)
   );
   const [isValid, setIsValid] = useState(true);

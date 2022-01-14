@@ -5,7 +5,7 @@ import { DefaultFormValues, FormState } from "./types";
 import { useForm } from "./useForm";
 import shallowEqual from "./utils/shallowEquals";
 
-export interface UseFormSubscription {
+export interface UseFormSelector {
   <V extends DefaultFormValues, T = FormState<V>>(
     ...args:
       | []
@@ -14,7 +14,7 @@ export interface UseFormSubscription {
   ): T;
 }
 
-export const useFormSubscription: UseFormSubscription = (...args) => {
+export const useFormSelector: UseFormSelector = (...args) => {
   const contextTk = useForm<any>();
 
   const tk = args[0] instanceof FormToolkit ? args[0] : undefined;
@@ -23,7 +23,7 @@ export const useFormSubscription: UseFormSubscription = (...args) => {
 
   invariant(
     contextTk || tk,
-    "useFormSubscription - Either use inside FormMighty scope or pass toolkit as the first argument"
+    "useFormSelector - Either use inside FormMighty scope or pass toolkit as the first argument"
   );
 
   const subscriptionFnRef = useRef<typeof subscriptionFn>(subscriptionFn);

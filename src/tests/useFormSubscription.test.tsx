@@ -1,17 +1,17 @@
 import { act, renderHook } from "@testing-library/react-hooks";
 import { FormMighty, FormState } from "src/lib";
 import { FormToolkit } from "src/lib/FormToolkit";
-import { useFormSubscription } from "src/lib/useFormSubscription";
+import { useFormSelector } from "src/lib/useFormSelector";
 
 it("should work", () => {
-  const { result } = renderHook(() => useFormSubscription(new FormToolkit()));
+  const { result } = renderHook(() => useFormSelector(new FormToolkit()));
 
   expect(result.error).not.toBeDefined();
 });
 
 it("should return the entire form state if passing a toolkit instance", () => {
   const tk = new FormToolkit();
-  const { result } = renderHook(() => useFormSubscription(tk));
+  const { result } = renderHook(() => useFormSelector(tk));
 
   expect(result.current).toBe(tk.getState());
 });
@@ -23,7 +23,7 @@ it("should use the toolkit from context if not passed", () => {
     return <FormMighty toolkit={tk}>{children}</FormMighty>;
   };
 
-  const { result } = renderHook(() => useFormSubscription(), {
+  const { result } = renderHook(() => useFormSelector(), {
     wrapper: Wrapper,
   });
 
@@ -35,7 +35,7 @@ it("should return a reactive form state", async () => {
     initialValues: { value: 1 },
   });
 
-  const { result } = renderHook(() => useFormSubscription(tk));
+  const { result } = renderHook(() => useFormSelector(tk));
 
   act(() => {
     tk.updateValues((draft) => {
@@ -52,7 +52,7 @@ it("should return a form state using a given subscriptionFn", async () => {
   });
 
   const { result } = renderHook(() =>
-    useFormSubscription(tk, (state) => state.values.value)
+    useFormSelector(tk, (state) => state.values.value)
   );
 
   expect(result.current).toBe(tk.getState().values.value);
@@ -69,7 +69,7 @@ it("should accept subscriptionFn as first argument and use context's toolkit", a
   };
 
   const { result } = renderHook(
-    () => useFormSubscription((state: FormState<MyForm>) => state.values.value),
+    () => useFormSelector((state: FormState<MyForm>) => state.values.value),
     {
       wrapper: Wrapper,
     }
@@ -84,7 +84,7 @@ it("should not trigger render if result equals shallowly", async () => {
   });
 
   const { result } = renderHook(() =>
-    useFormSubscription(tk, (state) => ({ ...state.initialValues }))
+    useFormSelector(tk, (state) => ({ ...state.initialValues }))
   );
 
   tk.updateValues((draft) => {
