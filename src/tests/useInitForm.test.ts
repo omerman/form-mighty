@@ -19,11 +19,3 @@ it("should create FormToolkit with given options", () => {
 
   expect(FormToolkit).toHaveBeenCalledWith(myOptions);
 });
-
-it("should invoke toolkit disposal uppon unmount", () => {
-  const { unmount } = renderHook(() => useInitForm());
-
-  expect(FormToolkit.prototype.dispose).toHaveBeenCalledTimes(0);
-  unmount();
-  expect(FormToolkit.prototype.dispose).toHaveBeenCalledTimes(1);
-});

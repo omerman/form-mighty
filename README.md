@@ -16,5 +16,5 @@
 | FieldArray Component       | :white_large_square: | :white_large_square: |
 | useInitForm hook           | :white_large_square: | :white_check_mark:   |
 | useField hook              | :white_large_square: | :white_large_square: |
-| useFormSubscription hook   | :white_large_square: | :white_check_mark:   |
+| useFormSelector hook       | :white_large_square: | :white_check_mark:   |
 | Storybook                  | :white_large_square: | :white_large_square: |
