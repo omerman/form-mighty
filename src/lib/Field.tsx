@@ -1,25 +1,27 @@
 import { get, set, uniqueId } from "lodash";
 import React, { useEffect, useRef, useState } from "react";
 import { EventUtils } from "./utils/EventUtils";
-import { All, FieldPath } from "./types";
+import { All, FieldPath, FieldTypes } from "./types";
 import { useFormSelector } from "./useFormSelector";
 import { useForm } from "./useForm";
 
 export interface FieldProps<FP extends FieldPath.FieldPath | string = string> {
   fieldPath: FP;
-  children: (
+  children?: (
     descriptor: FieldDescriptor<FP>,
     fieldState: { isDirty: boolean; isValid: boolean }
   ) => React.ReactNode;
   validate?: (
     value: FieldPath.InferFieldValue<FP>
   ) => boolean | Promise<boolean>;
+  type?: keyof FieldTypes;
 }
 
 export const Field = <FP extends FieldPath.FieldPath | string = string>({
   children,
   fieldPath,
   validate,
+  type,
 }: FieldProps<FP>) => {
   const toolkit = useForm();
   const value = useFormSelector((state) => get(state.values, fieldPath));
@@ -59,7 +61,13 @@ export const Field = <FP extends FieldPath.FieldPath | string = string>({
     },
   };
 
-  return <>{children(descriptor, { isDirty, isValid })}</>;
+  return (
+    <>
+      {children?.(descriptor, { isDirty, isValid }) ?? (
+        <input defaultValue={descriptor.value} onChange={descriptor.onChange} />
+      )}
+    </>
+  );
 };
 
 export type FieldDescriptor<FP extends FieldPath.FieldPath | string> = {

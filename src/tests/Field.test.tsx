@@ -6,17 +6,19 @@ import { FormToolkit } from "src/lib/FormToolkit";
 import { waitForTime } from "./utils";
 
 it("should render", () => {
-  render(
+  const { container } = render(
     <FormMighty initialValues={{}}>
-      <Field fieldPath="">{({ value, onChange }) => <code>Hi</code>}</Field>
+      <Field fieldPath="path.to.value" />
     </FormMighty>
   );
+
+  expect(container.querySelector("input")).toBeInTheDocument();
 });
 
 it("should render children", async () => {
   const { container } = render(
     <FormMighty initialValues={{}}>
-      <Field fieldPath="">{() => <code>Hi</code>}</Field>
+      <Field fieldPath="path.to.value">{() => <code>Hi</code>}</Field>
     </FormMighty>
   );
 
@@ -26,7 +28,7 @@ it("should render children", async () => {
 it("should accept fieldPath", async () => {
   render(
     <FormMighty initialValues={{}}>
-      <Field fieldPath={"a.b"}>{() => <code>Hi</code>}</Field>
+      <Field fieldPath="path.to.value">{() => <code>Hi</code>}</Field>
     </FormMighty>
   );
 });
@@ -36,7 +38,7 @@ it("should render field value matching the given path", async () => {
     <FormMighty initialValues={{ value: 5 }}>
       {(tk) => (
         <Field fieldPath={tk.path("value")}>
-          {({ value, onChange }) => <code>{value}</code>}
+          {({ value }) => <code>{value}</code>}
         </Field>
       )}
     </FormMighty>
@@ -384,6 +386,47 @@ describe("validation aspect", () => {
       await waitForTime(FIRST_VALIDATE_DELAY_TIME + 1);
 
       expect(container.querySelector("code")).toHaveTextContent(/^true$/);
+    });
+  });
+});
+
+describe("using type", () => {
+  describe("type=text", () => {
+    it("should render input", () => {
+      const { container } = render(
+        <FormMighty initialValues={{}}>
+          <Field fieldPath="path.to.value" type="text" />
+        </FormMighty>
+      );
+
+      expect(container.querySelector("input")).toBeInTheDocument();
+    });
+
+    it("should render input with initial value", () => {
+      const { container } = render(
+        <FormMighty initialValues={{ field: "5" }}>
+          {(tk) => <Field fieldPath={tk.path("field")} type="text" />}
+        </FormMighty>
+      );
+
+      expect(container.querySelector("input")).toHaveValue("5");
+    });
+
+    it("should render input with reactive value", () => {
+      const toolkit = new FormToolkit({
+        initialValues: { field: "" },
+      });
+
+      const { container } = render(
+        <FormMighty toolkit={toolkit}>
+          {(tk) => <Field fieldPath={tk.path("field")} type="text" />}
+        </FormMighty>
+      );
+
+      userEvent.type(container.querySelector("input")!, "1000");
+
+      expect(container.querySelector("input")).toHaveValue("1000");
+      expect(toolkit.getState().values.field).toBe("1000");
     });
   });
 });
