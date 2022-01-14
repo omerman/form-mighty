@@ -1,4 +1,5 @@
 import produce, { Draft, Patch } from "immer";
+import { WritableDraft } from "immer/dist/internal";
 import { uniqueId, get } from "lodash";
 import {
   FormState,
@@ -6,9 +7,8 @@ import {
   FormToolkitOptions,
   FieldPath,
 } from "./types";
-import { WritableDraft } from "immer/dist/internal";
-import { DirtyPathsFinder } from "./utils/DirtyPathsFinder";
 import { DottedPaths } from "./types/DottedPath";
+import { DirtyPathsFinder } from "./utils/DirtyPathsFinder";
 
 export class FormToolkit<V extends DefaultFormValues> {
   private state!: FormState<V>;

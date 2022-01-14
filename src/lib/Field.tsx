@@ -1,10 +1,9 @@
 import { get, set, uniqueId } from "lodash";
 import React, { useEffect, useRef, useState } from "react";
-import { useFormSelector } from ".";
-import { All } from "./types";
-import { FieldPath } from "./types/FieldPath";
-import { useForm } from "./useForm";
 import { EventUtils } from "./utils/EventUtils";
+import { All, FieldPath } from "./types";
+import { useFormSelector } from "./useFormSelector";
+import { useForm } from "./useForm";
 
 export interface FieldProps<FP extends FieldPath.FieldPath | string = string> {
   fieldPath: FP;

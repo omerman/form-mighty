@@ -1,8 +1,8 @@
 import React, { useRef } from "react";
 import invariant from "invariant";
-import { FormToolkit } from "./FormToolkit";
-import { FormContextProvider } from "./context";
 import { DefaultFormValues, FormToolkitOptions } from "./types";
+import { FormContextProvider } from "./context";
+import { FormToolkit } from "./FormToolkit";
 
 export interface FormMightyProps<V extends DefaultFormValues>
   extends FormToolkitOptions<V> {
