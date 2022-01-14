@@ -1,24 +1,16 @@
 import { render, waitFor } from "@testing-library/react";
-import { FormProvider, FormState, FormSubscribtion } from "src/lib";
+import { FormState, FormSubscribtion } from "src/lib";
 import { FormMighty } from "src/lib/FormMighty";
 import { FormToolkit } from "src/lib/FormToolkit";
 
 it("should render children", () => {
-  render(
-    <FormProvider>
-      <FormMighty>{() => null}</FormMighty>
-    </FormProvider>
-  );
+  render(<FormMighty>{() => null}</FormMighty>);
 });
 
 it("should render component", () => {
   const MySweetComponent = () => <code>Yey</code>;
 
-  const { container } = render(
-    <FormProvider>
-      <FormMighty component={MySweetComponent} />
-    </FormProvider>
-  );
+  const { container } = render(<FormMighty component={MySweetComponent} />);
 
   expect(container.querySelector("code")).toHaveTextContent("Yey");
 });
@@ -26,13 +18,7 @@ it("should render component", () => {
 it("should throw if no children & no component prop supplied", () => {
   const consoleSpy = jest.spyOn(console, "error").mockImplementation(() => {});
 
-  expect(() =>
-    render(
-      <FormProvider>
-        <FormMighty />
-      </FormProvider>
-    )
-  ).toThrow();
+  expect(() => render(<FormMighty />)).toThrow();
 
   consoleSpy.mockRestore();
 });
@@ -40,11 +26,7 @@ it("should throw if no children & no component prop supplied", () => {
 describe("formToolkit", () => {
   it("should be supplied while rendering children", () => {
     const { container } = render(
-      <FormProvider>
-        <FormMighty>
-          {(tk) => <code>{String(tk !== undefined)}</code>}
-        </FormMighty>
-      </FormProvider>
+      <FormMighty>{(tk) => <code>{String(tk !== undefined)}</code>}</FormMighty>
     );
 
     expect(container.querySelector("code")).toHaveTextContent("true");
@@ -53,11 +35,9 @@ describe("formToolkit", () => {
   it("should be instantiated with given initialValues", () => {
     const initialValues = { a: 5 };
     const { container } = render(
-      <FormProvider>
-        <FormMighty initialValues={initialValues}>
-          {(tk) => <code>{JSON.stringify(tk.getState().initialValues)}</code>}
-        </FormMighty>
-      </FormProvider>
+      <FormMighty initialValues={initialValues}>
+        {(tk) => <code>{JSON.stringify(tk.getState().initialValues)}</code>}
+      </FormMighty>
     );
 
     expect(container.querySelector("code")).toHaveTextContent(
@@ -67,11 +47,9 @@ describe("formToolkit", () => {
 
   it("should be instantiated with given initialIsValidating", () => {
     const { container } = render(
-      <FormProvider>
-        <FormMighty initialIsValidating={false}>
-          {(tk) => <code>{String(tk.getState().isValidating)}</code>}
-        </FormMighty>
-      </FormProvider>
+      <FormMighty initialIsValidating={false}>
+        {(tk) => <code>{String(tk.getState().isValidating)}</code>}
+      </FormMighty>
     );
 
     expect(container.querySelector("code")).toHaveTextContent("false");
@@ -79,11 +57,9 @@ describe("formToolkit", () => {
 
   it("should be instantiated with given initialIsValid", () => {
     const { container } = render(
-      <FormProvider>
-        <FormMighty initialIsValid={false}>
-          {(tk) => <code>{String(tk.getState().isValid)}</code>}
-        </FormMighty>
-      </FormProvider>
+      <FormMighty initialIsValid={false}>
+        {(tk) => <code>{String(tk.getState().isValid)}</code>}
+      </FormMighty>
     );
 
     expect(container.querySelector("code")).toHaveTextContent("false");
@@ -91,13 +67,11 @@ describe("formToolkit", () => {
 
   it("should be instantiated with given validate", async () => {
     const { container } = render(
-      <FormProvider>
-        <FormMighty initialIsValid={true} validate={() => false}>
-          <FormSubscribtion subscription={(fs: FormState) => fs.isValid}>
-            {(isValid) => <code>{String(isValid)}</code>}
-          </FormSubscribtion>
-        </FormMighty>
-      </FormProvider>
+      <FormMighty initialIsValid={true} validate={() => false}>
+        <FormSubscribtion subscription={(fs: FormState) => fs.isValid}>
+          {(isValid) => <code>{String(isValid)}</code>}
+        </FormSubscribtion>
+      </FormMighty>
     );
 
     await waitFor(() =>
@@ -110,14 +84,12 @@ describe("formToolkit", () => {
     let tk: FormToolkit<any>;
 
     render(
-      <FormProvider>
-        <FormMighty onSubmit={onSubmit}>
-          {(_tk) => {
-            tk = _tk;
-            return null;
-          }}
-        </FormMighty>
-      </FormProvider>
+      <FormMighty onSubmit={onSubmit}>
+        {(_tk) => {
+          tk = _tk;
+          return null;
+        }}
+      </FormMighty>
     );
 
     await tk!.submit();
@@ -130,11 +102,9 @@ describe("formToolkit", () => {
     });
 
     const { container } = render(
-      <FormProvider>
-        <FormMighty toolkit={toolkit}>
-          {(tk) => <code>{JSON.stringify(tk.getState().initialValues)}</code>}
-        </FormMighty>
-      </FormProvider>
+      <FormMighty toolkit={toolkit}>
+        {(tk) => <code>{JSON.stringify(tk.getState().initialValues)}</code>}
+      </FormMighty>
     );
 
     await waitFor(() =>

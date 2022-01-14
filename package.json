@@ -41,11 +41,10 @@
     "babel-loader": "8.1.0"
   },
   "dependencies": {
+    "@babel/runtime": "^7.16.7",
     "immer": "^9.0.7",
     "invariant": "^2.2.4",
     "lodash": "^4.17.21",
-    "react-redux": "^7.2.6",
-    "redux": "^4.1.2",
     "web-vitals": "^1.0.1"
   },
   "devDependencies": {

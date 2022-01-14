@@ -1,8 +1,9 @@
 import invariant from "invariant";
-import { shallowEqual, useSelector } from "react-redux";
+import { useEffect, useRef, useState } from "react";
 import { FormToolkit } from "./FormToolkit";
 import { DefaultFormValues, FormState } from "./types";
 import { useForm } from "./useForm";
+import shallowEqual from "./utils/shallowEquals";
 
 export interface UseFormSubscription {
   <V extends DefaultFormValues, T = FormState<V>>(
@@ -25,8 +26,27 @@ export const useFormSubscription: UseFormSubscription = (...args) => {
     "useFormSubscription - Either use inside FormMighty scope or pass toolkit as the first argument"
   );
 
-  return useSelector(
-    () => subscriptionFn((tk ?? contextTk).getState()),
-    shallowEqual
-  ) as any;
+  const subscriptionFnRef = useRef<typeof subscriptionFn>(subscriptionFn);
+  subscriptionFnRef.current = subscriptionFn;
+  const [result, setResult] = useState<any>(
+    subscriptionFnRef.current((tk ?? contextTk).getState())
+  );
+
+  useEffect(() => {
+    const toolkit = tk ?? contextTk;
+    const unsubscribe = toolkit.subscribe((state) => {
+      setResult((currRes: any) => {
+        const nextRes = subscriptionFnRef.current(state);
+        if (!shallowEqual(currRes, nextRes)) {
+          return nextRes;
+        } else {
+          return currRes;
+        }
+      });
+    });
+
+    return unsubscribe;
+  }, [tk, contextTk]);
+
+  return result as any;
 };

@@ -13,9 +13,5 @@ export const useInitForm: UseInitForm = (options = {}) => {
 
   const toolkit = useMemo(() => new FormToolkit(optionsRef.current), []);
 
-  useEffect(() => {
-    return () => toolkit.dispose();
-  }, [toolkit]);
-
   return toolkit;
 };

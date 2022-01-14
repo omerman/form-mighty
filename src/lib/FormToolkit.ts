@@ -1,7 +1,5 @@
 import produce, { Draft, Patch } from "immer";
 import { uniqueId, get } from "lodash";
-import { disposeForm, updateFormState } from "./redux/actions";
-import { store } from "./redux/store";
 import {
   FormState,
   DefaultFormValues,
@@ -13,17 +11,15 @@ import { DirtyPathsFinder } from "./utils/DirtyPathsFinder";
 import { DottedPaths } from "./types/DottedPath";
 
 export class FormToolkit<V extends DefaultFormValues> {
-  public readonly formKey: string;
-
   private state!: FormState<V>;
 
   private validationToken!: string;
 
   private validationPromise!: Promise<boolean>;
 
-  constructor(private readonly options: FormToolkitOptions<V> = {}) {
-    this.formKey = uniqueId("form-");
+  private subscriptions: Array<(state: FormState<V>) => void> = [];
 
+  constructor(private readonly options: FormToolkitOptions<V> = {}) {
     this.setState({
       values: options.initialValues as V,
       initialValues: options.initialValues ?? {},
@@ -148,14 +144,16 @@ export class FormToolkit<V extends DefaultFormValues> {
       typeof updater === "function" ? produce(this.state, updater) : updater;
 
     this.state = nextState;
-    store.dispatch(updateFormState(this.formKey, this.state));
+    this.subscriptions.forEach((subscription) => {
+      subscription(this.state);
+    });
   }
 
-  dispose() {
-    store.dispatch(disposeForm(this.formKey));
-  }
+  subscribe(subscription: (state: FormState<V>) => void) {
+    this.subscriptions.push(subscription);
 
-  subscribe() {
-    throw new Error("Not implemented");
+    return () => {
+      this.subscriptions = this.subscriptions.filter((s) => s !== subscription);
+    };
   }
 }

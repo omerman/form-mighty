@@ -2,7 +2,6 @@ import { waitFor } from "@testing-library/react";
 import { set } from "lodash";
 import { FormToolkitOptions } from "src/lib";
 import { FormToolkit } from "src/lib/FormToolkit";
-import { store } from "src/lib/redux/store";
 import { waitForExpression, waitForTime } from "./utils";
 
 it("Should work with no args", () => {
@@ -11,17 +10,6 @@ it("Should work with no args", () => {
 
 it("Should work with empty args", () => {
   new FormToolkit({});
-});
-
-it("Should be stored by formKey uppon creation", () => {
-  const tk = new FormToolkit();
-  expect(store.getState()[tk.formKey]).toBe(tk.getState());
-});
-
-it("Should be disposed from store uppon disposal", () => {
-  const tk = new FormToolkit();
-  tk.dispose();
-  expect(store.getState()[tk.formKey]).not.toBeDefined();
 });
 
 describe("submit aspect", () => {
@@ -656,6 +644,51 @@ describe("dirty aspect", () => {
       });
 
       expect(tk.isFieldDirty("a")).toBe(true);
+    });
+  });
+});
+
+describe("subscribers", () => {
+  describe("subscribe", () => {
+    it("should accept a function that will be called once toolkit state changes", () => {
+      const tk = new FormToolkit({ initialValues: { x: 5 } });
+      const subscriber = jest.fn();
+      tk.subscribe(subscriber);
+
+      tk.updateValues((draft) => {
+        draft.x = 1000;
+      });
+
+      expect(subscriber).toHaveBeenCalledWith(tk.getState());
+    });
+
+    it("should return unsubscribe fn", () => {
+      const tk = new FormToolkit({ initialValues: { x: 5 } });
+      const subscriber = jest.fn();
+      const unsubscribe = tk.subscribe(subscriber);
+
+      unsubscribe();
+
+      tk.updateValues((draft) => {
+        draft.x = 1000;
+      });
+
+      expect(subscriber).not.toHaveBeenCalled();
+    });
+
+    it("should work with multiple subscribers", () => {
+      const tk = new FormToolkit({ initialValues: { x: 5 } });
+      const subscriber1 = jest.fn();
+      const subscriber2 = jest.fn();
+      tk.subscribe(subscriber1);
+      tk.subscribe(subscriber2);
+
+      tk.updateValues((draft) => {
+        draft.x = 1000;
+      });
+
+      expect(subscriber1).toHaveBeenCalledWith(tk.getState());
+      expect(subscriber2).toHaveBeenCalledWith(tk.getState());
     });
   });
 });
