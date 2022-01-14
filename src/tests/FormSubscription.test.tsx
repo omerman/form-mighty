@@ -6,9 +6,7 @@ import { FormToolkit } from "src/lib/FormToolkit";
 it("should render", () => {
   render(
     <FormMighty initialValues={{}}>
-      <FormSubscribtion subscription={() => ({})}>
-        {() => null}
-      </FormSubscribtion>
+      <FormSubscribtion selector={() => ({})}>{() => null}</FormSubscribtion>
     </FormMighty>
   );
 });
@@ -20,7 +18,7 @@ it("should throw if children not present", () => {
     render(
       <FormMighty initialValues={{}}>
         {/* @ts-ignore */}
-        <FormSubscribtion subscription={() => ({})} />
+        <FormSubscribtion selector={() => ({})} />
       </FormMighty>
     )
   ).toThrow();
@@ -33,7 +31,7 @@ it("should pass subscription result uppon render children", () => {
   const { container } = render(
     <FormMighty<MyForm> initialValues={{ field: 5 }}>
       <FormSubscribtion
-        subscription={(state: FormState<MyForm>) => ({
+        selector={(state: FormState<MyForm>) => ({
           res: state.values,
         })}
       >
@@ -54,7 +52,7 @@ it("should re-render if subscription field is changed", () => {
   const { container } = render(
     <FormMighty toolkit={tk}>
       <FormSubscribtion
-        subscription={(state: FormState<MyForm>) => ({
+        selector={(state: FormState<MyForm>) => ({
           field: state.values.field,
         })}
       >
@@ -86,7 +84,7 @@ it("should not re-render if subscription field is unchanged", () => {
   const { container } = render(
     <FormMighty toolkit={tk}>
       <FormSubscribtion
-        subscription={(state: FormState<MyForm>) => ({
+        selector={(state: FormState<MyForm>) => ({
           field1: state.values.field1,
         })}
       >
@@ -112,7 +110,7 @@ it("should pass toolkit instance uppon render children as second argument", () =
 
   render(
     <FormMighty toolkit={tk}>
-      <FormSubscribtion subscription={() => null}>
+      <FormSubscribtion selector={() => null}>
         {(_, tk) => {
           acceptFormToolkitFn(tk);
           return null;

@@ -68,7 +68,7 @@ describe("formToolkit", () => {
   it("should be instantiated with given validate", async () => {
     const { container } = render(
       <FormMighty initialIsValid={true} validate={() => false}>
-        <FormSubscribtion subscription={(fs: FormState) => fs.isValid}>
+        <FormSubscribtion selector={(fs: FormState) => fs.isValid}>
           {(isValid) => <code>{String(isValid)}</code>}
         </FormSubscribtion>
       </FormMighty>

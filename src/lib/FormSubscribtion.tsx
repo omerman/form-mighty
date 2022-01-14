@@ -5,18 +5,18 @@ import { useForm } from "./useForm";
 import { useFormSelector } from "./useFormSelector";
 
 export interface FormSubscribtionProps<V extends DefaultFormValues, T> {
-  subscription: (state: FormState<V>) => T;
+  selector: (state: FormState<V>) => T;
   children: (subscriptonResult: T, toolkit: FormToolkit<V>) => React.ReactNode;
 }
 
 export const FormSubscribtion = <V extends DefaultFormValues, T>({
-  subscription,
+  selector,
   children,
 }: FormSubscribtionProps<V, T>) => {
   invariant(children, "FormSubscribtion - Must include children");
   const formToolkit = useForm<V>();
 
-  const subscriptonResult = useFormSelector<V, T>(formToolkit, subscription);
+  const subscriptonResult = useFormSelector<V, T>(formToolkit, selector);
 
   return <>{children(subscriptonResult, formToolkit)}</>;
 };

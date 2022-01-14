@@ -18,7 +18,7 @@ export const useFormSelector: UseFormSelector = (...args) => {
   const contextTk = useForm<any>();
 
   const tk = args[0] instanceof FormToolkit ? args[0] : undefined;
-  const subscriptionFn =
+  const selectorFn =
     (args[0] instanceof FormToolkit ? args[1] : args[0]) ?? ((state) => state);
 
   invariant(
@@ -26,17 +26,17 @@ export const useFormSelector: UseFormSelector = (...args) => {
     "useFormSelector - Either use inside FormMighty scope or pass toolkit as the first argument"
   );
 
-  const subscriptionFnRef = useRef<typeof subscriptionFn>(subscriptionFn);
-  subscriptionFnRef.current = subscriptionFn;
+  const selectorFnRef = useRef<typeof selectorFn>(selectorFn);
+  selectorFnRef.current = selectorFn;
   const [result, setResult] = useState<any>(
-    subscriptionFnRef.current((tk ?? contextTk).getState())
+    selectorFnRef.current((tk ?? contextTk).getState())
   );
 
   useEffect(() => {
     const toolkit = tk ?? contextTk;
     const unsubscribe = toolkit.subscribe((state) => {
       setResult((currRes: any) => {
-        const nextRes = subscriptionFnRef.current(state);
+        const nextRes = selectorFnRef.current(state);
         if (!shallowEqual(currRes, nextRes)) {
           return nextRes;
         } else {
