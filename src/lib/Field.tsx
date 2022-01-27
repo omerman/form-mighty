@@ -4,6 +4,7 @@ import { EventUtils } from "./utils/EventUtils";
 import { All, FieldPath, FieldTypes } from "./types";
 import { useFormSelector } from "./useFormSelector";
 import { useForm } from "./useForm";
+import invariant from "invariant";
 
 export interface FieldProps<FP extends FieldPath.FieldPath | string = string> {
   fieldPath: FP;
@@ -21,8 +22,13 @@ export const Field = <FP extends FieldPath.FieldPath | string = string>({
   children,
   fieldPath,
   validate,
-  type,
+  type = "text",
 }: FieldProps<FP>) => {
+  invariant(
+    children !== undefined || type === "text" || type === "number",
+    "Field - Must either include children or a valid type"
+  );
+
   const toolkit = useForm();
   const value = useFormSelector((state) => get(state.values, fieldPath));
   const isDirty = useFormSelector(() =>
@@ -64,7 +70,11 @@ export const Field = <FP extends FieldPath.FieldPath | string = string>({
   return (
     <>
       {children?.(descriptor, { isDirty, isValid }) ?? (
-        <input defaultValue={descriptor.value} onChange={descriptor.onChange} />
+        <input
+          defaultValue={descriptor.value}
+          onChange={descriptor.onChange}
+          type={type === "text" ? "text" : "number"}
+        />
       )}
     </>
   );

@@ -2,6 +2,7 @@ import { act, render } from "@testing-library/react";
 import { FormMighty } from "src/lib/FormMighty";
 import { FormState, FormSubscribtion } from "src/lib";
 import { FormToolkit } from "src/lib/FormToolkit";
+import { expectToThrow } from "./utils";
 
 it("should render", () => {
   render(
@@ -12,18 +13,14 @@ it("should render", () => {
 });
 
 it("should throw if children not present", () => {
-  const consoleSpy = jest.spyOn(console, "error").mockImplementation(() => {});
-
-  expect(() =>
+  expectToThrow(() =>
     render(
       <FormMighty initialValues={{}}>
         {/* @ts-ignore */}
         <FormSubscribtion selector={() => ({})} />
       </FormMighty>
     )
-  ).toThrow();
-
-  consoleSpy.mockRestore();
+  );
 });
 
 it("should pass subscription result uppon render children", () => {

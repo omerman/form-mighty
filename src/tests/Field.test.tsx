@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { Field } from "src/lib/Field";
 import { FormMighty } from "src/lib/FormMighty";
 import { FormToolkit } from "src/lib/FormToolkit";
-import { waitForTime } from "./utils";
+import { expectToThrow, waitForTime } from "./utils";
 
 it("should render", () => {
   const { container } = render(
@@ -402,6 +402,16 @@ describe("using type", () => {
       expect(container.querySelector("input")).toBeInTheDocument();
     });
 
+    it("should render input with type=text", () => {
+      const { container } = render(
+        <FormMighty initialValues={{}}>
+          <Field fieldPath="path.to.value" type="text" />
+        </FormMighty>
+      );
+
+      expect(container.querySelector('input[type="text"]')).toBeInTheDocument();
+    });
+
     it("should render input with initial value", () => {
       const { container } = render(
         <FormMighty initialValues={{ field: "5" }}>
@@ -428,5 +438,67 @@ describe("using type", () => {
       expect(container.querySelector("input")).toHaveValue("1000");
       expect(toolkit.getState().values.field).toBe("1000");
     });
+  });
+
+  describe("type=number", () => {
+    it("should render input", () => {
+      const { container } = render(
+        <FormMighty initialValues={{}}>
+          <Field fieldPath="path.to.value" type="number" />
+        </FormMighty>
+      );
+
+      expect(container.querySelector("input")).toBeInTheDocument();
+    });
+
+    it("should render input with type=number", () => {
+      const { container } = render(
+        <FormMighty initialValues={{}}>
+          <Field fieldPath="path.to.value" type="number" />
+        </FormMighty>
+      );
+
+      expect(
+        container.querySelector('input[type="number"]')
+      ).toBeInTheDocument();
+    });
+
+    it("should render input with initial value", () => {
+      const { container } = render(
+        <FormMighty initialValues={{ field: "5" }}>
+          {(tk) => <Field fieldPath={tk.path("field")} type="number" />}
+        </FormMighty>
+      );
+
+      expect(container.querySelector("input")).toHaveValue(5);
+    });
+
+    it("should render input with reactive value", () => {
+      const toolkit = new FormToolkit({
+        initialValues: { field: "" },
+      });
+
+      const { container } = render(
+        <FormMighty toolkit={toolkit}>
+          {(tk) => <Field fieldPath={tk.path("field")} type="number" />}
+        </FormMighty>
+      );
+
+      userEvent.type(container.querySelector("input")!, "1000");
+
+      expect(container.querySelector("input")).toHaveValue(1000);
+      expect(toolkit.getState().values.field).toBe("1000");
+    });
+  });
+
+  it("unknown type should throw error", () => {
+    expectToThrow(() =>
+      render(
+        <FormMighty initialValues={{}}>
+          {/* @ts-ignore */}
+          <Field fieldPath="path.to.value" type="x" />
+        </FormMighty>
+      )
+    );
   });
 });

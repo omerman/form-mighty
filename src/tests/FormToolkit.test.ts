@@ -126,10 +126,6 @@ describe("submit aspect", () => {
     });
 
     it("should be bound to the class instace", async () => {
-      const consoleSpy = jest
-        .spyOn(console, "error")
-        .mockImplementation(() => {});
-
       const opts: FormToolkitOptions = {
         onSubmit: jest.fn(),
         initialIsValid: true,
@@ -139,8 +135,6 @@ describe("submit aspect", () => {
       const { submit } = new FormToolkit(opts);
 
       await expect(submit()).resolves.not.toThrow();
-
-      consoleSpy.mockRestore();
     });
   });
 

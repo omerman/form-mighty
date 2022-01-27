@@ -2,6 +2,7 @@ import { render, waitFor } from "@testing-library/react";
 import { FormState, FormSubscribtion } from "src/lib";
 import { FormMighty } from "src/lib/FormMighty";
 import { FormToolkit } from "src/lib/FormToolkit";
+import { expectToThrow } from "./utils";
 
 it("should render children", () => {
   render(<FormMighty>{() => null}</FormMighty>);
@@ -16,11 +17,7 @@ it("should render component", () => {
 });
 
 it("should throw if no children & no component prop supplied", () => {
-  const consoleSpy = jest.spyOn(console, "error").mockImplementation(() => {});
-
-  expect(() => render(<FormMighty />)).toThrow();
-
-  consoleSpy.mockRestore();
+  expectToThrow(() => render(<FormMighty />));
 });
 
 describe("formToolkit", () => {
